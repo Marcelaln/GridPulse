@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="GridPulse — El hub definitivo de Fórmula 1 para fans. Noticias, calendario, standings y comunidad.">
+<title>GridPulse — F1 para Fans</title>
+<link rel="stylesheet" href="gridpulse.css">
+<style>
+/* ── HOME-ONLY STYLES ── */
+.home-grid {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 32px;
+  align-items: start;
+}
+
+/* Featured news */
+.gp-news-featured {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color var(--transition), transform var(--transition);
+  margin-bottom: 20px;
+}
+.gp-news-featured:hover { border-color: var(--red); transform: translateY(-2px); }
+
+.gp-news-featured-img {
+  width: 100%;
+  height: 260px;
+  background: linear-gradient(135deg, #141414 0%, #1e1e1e 100%);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.gp-news-featured-img img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  opacity: 0.82;
+  transition: transform 0.4s ease, opacity 0.3s;
+}
+.gp-news-featured:hover .gp-news-featured-img img { transform: scale(1.04); opacity: 0.9; }
+
+.gp-news-featured-cat {
+  position: absolute;
+  top: 16px; left: 16px;
+  background: var(--red);
+  font-family: var(--font-ui);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: white;
+  text-transform: uppercase;
+  padding: 4px 12px;
+  clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 100%, 6px 100%);
+}
+
+.gp-news-featured-body { padding: 22px; }
+
+.gp-news-featured-title {
+  font-family: var(--font-ui);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--white);
+  line-height: 1.35;
+  margin-bottom: 8px;
+}
+
+.gp-news-list { display: flex; flex-direction: column; gap: 1px; }
+
+.gp-news-item {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  padding: 16px;
+  display: flex;
+  gap: 14px;
+  cursor: pointer;
+  transition: border-color var(--transition), background var(--transition);
+  border-radius: var(--radius);
+}
+.gp-news-item:hover { border-color: var(--red); background: rgba(255,255,255,0.02); }
+
+.gp-news-item-num {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: var(--border-mid);
+  min-width: 28px;
+  line-height: 1;
+  padding-top: 2px;
+}
+
+.gp-news-item-cat {
+  font-family: var(--font-ui);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: var(--red);
+  text-transform: uppercase;
+  margin-bottom: 3px;
+}
+
+.gp-news-item-title {
+  font-family: var(--font-ui);
+  font-size: 0.93rem;
+  font-weight: 600;
+  color: var(--white);
+  line-height: 1.3;
+  margin-bottom: 5px;
+}
+
+/* Mini standings in sidebar */
+.gp-standings-mini {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.gp-standings-mini-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+}
+
+.gp-standings-mini-title {
+  font-family: var(--font-ui);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: var(--gray);
+  text-transform: uppercase;
+}
+
+.gp-driver-mini-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 18px;
+  border-bottom: 1px solid var(--border);
+  transition: background var(--transition);
+}
+.gp-driver-mini-row:hover { background: rgba(255,255,255,0.025); }
+.gp-driver-mini-row:last-child { border-bottom: none; }
+
+.gp-driver-mini-pos {
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--gray-mid);
+  min-width: 16px;
+}
+.gp-driver-mini-pos.top { color: var(--white); }
+
+.gp-driver-mini-bar {
+  width: 3px; height: 26px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.gp-driver-mini-name {
+  font-family: var(--font-ui);
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--white);
+}
+
+.gp-driver-mini-team {
+  font-size: 0.62rem;
+  color: var(--gray-mid);
+}
+
+.gp-driver-mini-pts {
+  font-family: var(--font-display);
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--white);
+  margin-left: auto;
+}
+
+@media (max-width: 1024px) {
+  .home-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════ HEADER ══════════════════ -->
+<header class="gp-header">
+  <div class="gp-container gp-header-inner">
+
+    <a href="index.html" class="gp-logo">
+      <div class="gp-logo-mark">
+        <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      </div>
+      <span class="gp-logo-text">Grid<span>Pulse</span></span>
+    </a>
+
+    <nav class="gp-nav">
+      <a href="index.html"        class="gp-nav-link active">Home</a>
+      <a href="noticias.html"     class="gp-nav-link">Noticias</a>
+      <a href="calendario.html"   class="gp-nav-link">Calendario</a>
+      <a href="standings.html"    class="gp-nav-link">Standings</a>
+      <a href="equipos.html"      class="gp-nav-link">Equipos</a>
+      <a href="pittalk.html"      class="gp-nav-link">Pit Talk</a>
+    </nav>
+
+    <div class="gp-clock-wrap">
+      <div class="gp-live-pill">
+        <div class="gp-live-dot"></div>
+        LIVE
+      </div>
+      <div>
+        <div class="gp-clock" id="gp-clock">--:--:--</div>
+        <div class="gp-clock-date" id="gp-clock-date">---</div>
+      </div>
+    </div>
+
+    <button class="gp-hamburger" id="gp-hamburger" onclick="gpToggleMenu()" aria-label="Menú">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<!-- MOBILE NAV -->
+<nav class="gp-mobile-nav" id="gp-mobile-nav">
+  <a href="index.html"      class="active">🏠 Home</a>
+  <a href="noticias.html"  >📰 Noticias</a>
+  <a href="calendario.html">📅 Calendario</a>
+  <a href="standings.html" >🏆 Standings</a>
+  <a href="equipos.html"   >🏎️ Equipos</a>
+  <a href="pittalk.html"   >💬 Pit Talk</a>
+</nav>
+
+<!-- ══════════════════ MAIN ══════════════════ -->
+<main class="gp-page">
+<div class="gp-container">
+
+  <!-- HERO -->
+  <section class="gp-hero gp-anim-fadeUp">
+    <div class="gp-hero-bg"></div>
+    <div class="gp-speed-lines">
+      <div class="gp-speed-line"></div>
+      <div class="gp-speed-line"></div>
+      <div class="gp-speed-line"></div>
+      <div class="gp-speed-line"></div>
+    </div>
+    <div class="gp-hero-stripe"></div>
+
+    <div class="gp-hero-content">
+      <div class="gp-hero-eyebrow">Temporada 2025 · En Vivo</div>
+      <h1 class="gp-hero-title">
+        <span class="block">La Velocidad</span>
+        <span class="block red">es tu Pulso.</span>
+      </h1>
+      <p class="gp-hero-desc">
+        Noticias en tiempo real, calendario de Grandes Premios, standings actualizados y la comunidad F1 más apasionada. Todo en un solo lugar.
+      </p>
+      <div style="display:flex; gap:12px; flex-wrap:wrap;">
+        <a href="noticias.html" class="gp-btn gp-btn-primary">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          Últimas Noticias
+        </a>
+        <a href="calendario.html" class="gp-btn gp-btn-outline">
+          📅 Ver Calendario
+        </a>
+      </div>
+    </div>
+
+    <div class="gp-hero-watermark">F1</div>
+  </section>
+
+  <!-- STATS BAR -->
+  <div class="gp-stats-bar gp-mb-lg">
+    <div class="gp-stat gp-anim-fadeUp gp-stagger-1">
+      <div class="gp-stat-num">2<span class="red">4</span></div>
+      <div class="gp-stat-label">Grandes Premios</div>
+    </div>
+    <div class="gp-stat gp-anim-fadeUp gp-stagger-2">
+      <div class="gp-stat-num">2<span class="red">0</span></div>
+      <div class="gp-stat-label">Pilotos</div>
+    </div>
+    <div class="gp-stat gp-anim-fadeUp gp-stagger-3">
+      <div class="gp-stat-num">1<span class="red">0</span></div>
+      <div class="gp-stat-label">Equipos</div>
+    </div>
+    <div class="gp-stat gp-anim-fadeUp gp-stagger-4">
+      <div class="gp-stat-num" id="races-done"><span class="red">—</span></div>
+      <div class="gp-stat-label">Carreras Disputadas</div>
+    </div>
+  </div>
+
+  <!-- HOME GRID: NEWS + SIDEBAR -->
+  <div class="home-grid">
+
+    <!-- LEFT: NEWS -->
+    <div>
+      <div class="gp-section-header">
+        <div>
+          <div class="gp-section-eyebrow">Feed en tiempo real</div>
+          <div class="gp-section-title">Últimas Noticias</div>
+        </div>
+        <a href="noticias.html" class="gp-see-all">Ver todo →</a>
+      </div>
+
+      <!-- FEATURED -->
+      <div id="home-featured">
+        <div class="gp-loading"><div class="gp-spinner"></div> Cargando…</div>
+      </div>
+
+      <!-- LIST -->
+      <div class="gp-news-list" id="home-news-list"></div>
+    </div>
+
+    <!-- SIDEBAR -->
+    <div style="display:flex; flex-direction:column; gap:24px;">
+
+      <!-- NEXT RACE -->
+      <div class="gp-next-race gp-anim-fadeUp gp-stagger-2">
+        <div class="gp-next-race-header">
+          <span class="gp-next-race-label">⚑ Próxima Carrera</span>
+          <span style="font-family:var(--font-display);font-size:.68rem;color:var(--gray-mid);" id="next-round">—</span>
+        </div>
+        <div class="gp-next-race-body">
+          <div class="gp-next-race-country" id="next-country">Cargando…</div>
+          <div class="gp-next-race-circuit" id="next-circuit">—</div>
+          <div class="gp-next-date-row">
+            <div class="gp-next-date-box">
+              <div class="gp-next-date-day" id="next-day">—</div>
+              <div class="gp-next-date-month" id="next-month">—</div>
+            </div>
+            <div class="gp-next-time">
+              <strong id="next-time">—</strong>
+              Hora local del circuito
+            </div>
+          </div>
+          <div class="gp-countdown-grid">
+            <div class="gp-cd-block"><span class="gp-cd-num" id="cd-d">--</span><span class="gp-cd-label">Días</span></div>
+            <div class="gp-cd-block"><span class="gp-cd-num" id="cd-h">--</span><span class="gp-cd-label">Horas</span></div>
+            <div class="gp-cd-block"><span class="gp-cd-num" id="cd-m">--</span><span class="gp-cd-label">Min</span></div>
+            <div class="gp-cd-block"><span class="gp-cd-num" id="cd-s">--</span><span class="gp-cd-label">Seg</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MINI STANDINGS -->
+      <div class="gp-standings-mini gp-anim-fadeUp gp-stagger-3">
+        <div class="gp-standings-mini-head">
+          <span class="gp-standings-mini-title">Standings 2025</span>
+          <div class="gp-tabs" style="border:none; background:transparent; gap:2px;">
+            <button class="gp-tab active" id="mini-tab-d" onclick="switchMiniTab('drivers')">Pilotos</button>
+            <button class="gp-tab"        id="mini-tab-c" onclick="switchMiniTab('constructors')">Equipos</button>
+          </div>
+        </div>
+        <div id="mini-standings"></div>
+        <div style="padding:12px 18px; border-top:1px solid var(--border);">
+          <a href="standings.html" class="gp-see-all" style="font-size:.68rem;">Ver clasificación completa →</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+</main>
+
+<!-- ══════════════════ FOOTER ══════════════════ -->
+<footer class="gp-footer">
+  <div class="gp-container">
+    <div class="gp-footer-inner">
+      <div class="gp-footer-brand">
+        <div class="gp-footer-brand-name">Grid<span>Pulse</span></div>
+        <p class="gp-footer-desc">El hub definitivo para fans de la Fórmula 1. Noticias en tiempo real, datos del campeonato, calendario de GPs y la comunidad más apasionada.</p>
+      </div>
+      <div class="gp-footer-col">
+        <h4>Secciones</h4>
+        <ul class="gp-footer-links">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="noticias.html">Noticias</a></li>
+          <li><a href="calendario.html">Calendario</a></li>
+          <li><a href="standings.html">Standings</a></li>
+          <li><a href="equipos.html">Equipos</a></li>
+          <li><a href="pittalk.html">Pit Talk</a></li>
+        </ul>
+      </div>
+      <div class="gp-footer-col">
+        <h4>GridPulse</h4>
+        <ul class="gp-footer-links">
+          <li><a href="#">Acerca de</a></li>
+          <li><a href="#">Fuentes de datos</a></li>
+          <li><a href="pittalk.html">Comunidad</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="gp-footer-bottom">
+      <span class="gp-footer-copy">© 2025 GridPulse — Para fans, por fans.</span>
+      <span class="gp-footer-tag">FORMULA 1 FAN PAGE</span>
+    </div>
+  </div>
+</footer>
+
+<!-- ══════════════════ SCRIPTS ══════════════════ -->
+<script>
+
+// ─── DATA ───────────────────────────────────────
+const CALENDAR = [
+  { round:1,  name:"Gran Premio de Australia",    circuit:"Albert Park",             flag:"🇦🇺", date:"2025-03-16", time:"05:00", done:true  },
+  { round:2,  name:"Gran Premio de China",         circuit:"Shanghái",                flag:"🇨🇳", date:"2025-03-23", time:"07:00", done:true  },
+  { round:3,  name:"Gran Premio de Japón",         circuit:"Suzuka",                  flag:"🇯🇵", date:"2025-04-06", time:"06:00", done:true  },
+  { round:4,  name:"Gran Premio de Baréin",        circuit:"Baréin Int.",             flag:"🇧🇭", date:"2025-04-13", time:"15:00", done:true  },
+  { round:5,  name:"Gran Premio de Arabia Saudí",  circuit:"Jeddah",                  flag:"🇸🇦", date:"2025-04-20", time:"17:00", done:true  },
+  { round:6,  name:"Gran Premio de Miami",         circuit:"Miami Int.",               flag:"🇺🇸", date:"2025-05-04", time:"19:00", done:true  },
+  { round:7,  name:"Gran Premio de Emilia-Romaña", circuit:"Imola",                   flag:"🇮🇹", date:"2025-05-18", time:"13:00", done:true  },
+  { round:8,  name:"Gran Premio de Mónaco",        circuit:"Mónaco",                  flag:"🇲🇨", date:"2025-05-25", time:"13:00", done:true  },
+  { round:9,  name:"Gran Premio de España",        circuit:"Barcelona-Catalunya",      flag:"🇪🇸", date:"2025-06-01", time:"13:00", done:false },
+  { round:10, name:"Gran Premio de Canadá",        circuit:"Gilles Villeneuve",        flag:"🇨🇦", date:"2025-06-15", time:"18:00", done:false },
+  { round:11, name:"Gran Premio de Austria",       circuit:"Red Bull Ring",            flag:"🇦🇹", date:"2025-06-29", time:"13:00", done:false },
+  { round:12, name:"Gran Premio de Gran Bretaña",  circuit:"Silverstone",              flag:"🇬🇧", date:"2025-07-06", time:"14:00", done:false },
+  { round:13, name:"Gran Premio de Bélgica",       circuit:"Spa-Francorchamps",        flag:"🇧🇪", date:"2025-07-27", time:"13:00", done:false },
+  { round:14, name:"Gran Premio de Hungría",       circuit:"Hungaroring",              flag:"🇭🇺", date:"2025-08-03", time:"13:00", done:false },
+  { round:15, name:"Gran Premio de los Países Bajos", circuit:"Zandvoort",            flag:"🇳🇱", date:"2025-08-31", time:"13:00", done:false },
+  { round:16, name:"Gran Premio de Italia",        circuit:"Monza",                    flag:"🇮🇹", date:"2025-09-07", time:"13:00", done:false },
+  { round:17, name:"Gran Premio de Azerbaiyán",    circuit:"Bakú",                    flag:"🇦🇿", date:"2025-09-21", time:"11:00", done:false },
+  { round:18, name:"Gran Premio de Singapur",      circuit:"Marina Bay",               flag:"🇸🇬", date:"2025-10-05", time:"08:00", done:false },
+  { round:19, name:"Gran Premio de EE. UU.",       circuit:"Circuit of the Americas",  flag:"🇺🇸", date:"2025-10-19", time:"19:00", done:false },
+  { round:20, name:"Gran Premio de México",        circuit:"Hermanos Rodríguez",       flag:"🇲🇽", date:"2025-10-26", time:"20:00", done:false },
+  { round:21, name:"Gran Premio de Brasil",        circuit:"Interlagos",               flag:"🇧🇷", date:"2025-11-09", time:"17:00", done:false },
+  { round:22, name:"Gran Premio de Las Vegas",     circuit:"Las Vegas Street",         flag:"🇺🇸", date:"2025-11-22", time:"06:00", done:false },
+  { round:23, name:"Gran Premio de Qatar",         circuit:"Losail",                   flag:"🇶🇦", date:"2025-11-30", time:"15:00", done:false },
+  { round:24, name:"Gran Premio de Abu Dabi",      circuit:"Yas Marina",               flag:"🇦🇪", date:"2025-12-07", time:"13:00", done:false },
+];
+
+const DRIVERS = [
+  { pos:1,  name:"Max Verstappen",   team:"Red Bull Racing",  pts:136, color:"#3671C6", abbr:"VER" },
+  { pos:2,  name:"Lando Norris",     team:"McLaren",          pts:131, color:"#FF8000", abbr:"NOR" },
+  { pos:3,  name:"Charles Leclerc", team:"Ferrari",           pts:98,  color:"#DC0000", abbr:"LEC" },
+  { pos:4,  name:"Oscar Piastri",    team:"McLaren",          pts:90,  color:"#FF8000", abbr:"PIA" },
+  { pos:5,  name:"George Russell",  team:"Mercedes",          pts:87,  color:"#00D2BE", abbr:"RUS" },
+  { pos:6,  name:"Carlos Sainz",    team:"Williams",          pts:68,  color:"#37BEDD", abbr:"SAI" },
+  { pos:7,  name:"Lewis Hamilton",  team:"Ferrari",           pts:60,  color:"#DC0000", abbr:"HAM" },
+  { pos:8,  name:"Kimi Antonelli",  team:"Mercedes",          pts:43,  color:"#00D2BE", abbr:"ANT" },
+];
+
+const CONSTRUCTORS = [
+  { pos:1, name:"McLaren",         pts:221, color:"#FF8000" },
+  { pos:2, name:"Ferrari",         pts:158, color:"#DC0000" },
+  { pos:3, name:"Red Bull Racing", pts:148, color:"#3671C6" },
+  { pos:4, name:"Mercedes",        pts:130, color:"#00D2BE" },
+  { pos:5, name:"Williams",        pts:68,  color:"#37BEDD" },
+  { pos:6, name:"Aston Martin",    pts:34,  color:"#006F62" },
+];
+
+const CATS = ['Carrera','Técnica','Campeonato','Paddock','Mercado','Análisis'];
+
+// ─── CLOCK ───────────────────────────────────────
+function updateClock() {
+  const now = new Date();
+  const pad = n => String(n).padStart(2,'0');
+  const clockEl = document.getElementById('gp-clock');
+  const dateEl  = document.getElementById('gp-clock-date');
+  if (clockEl) clockEl.textContent = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+  if (dateEl) {
+    const days   = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+    const months = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+    dateEl.textContent = `${days[now.getDay()]} ${now.getDate()} ${months[now.getMonth()]}`;
+  }
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ─── NEXT RACE + COUNTDOWN ───────────────────────
+function getNextRace() {
+  const now = new Date();
+  return CALENDAR.find(r => !r.done && new Date(r.date + 'T' + r.time) > now)
+      || CALENDAR.find(r => !r.done);
+}
+
+function initNextRace() {
+  const race = getNextRace();
+  if (!race) return;
+  const d = new Date(race.date);
+  const mons = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  const shortName = race.name.replace(/Gran Premio de (los )?/i,'');
+  document.getElementById('next-round').textContent   = `Ronda ${race.round}`;
+  document.getElementById('next-country').textContent = `${race.flag} ${shortName}`;
+  document.getElementById('next-circuit').textContent = race.circuit;
+  document.getElementById('next-day').textContent     = d.getDate();
+  document.getElementById('next-month').textContent   = mons[d.getMonth()];
+  document.getElementById('next-time').textContent    = `Carrera: ${race.time} hrs`;
+
+  const done = CALENDAR.filter(r => r.done).length;
+  const el = document.getElementById('races-done');
+  if (el) el.innerHTML = `${done}<span class="red"></span>`;
+}
+
+function updateCountdown() {
+  const race = getNextRace();
+  if (!race) return;
+  const target = new Date(`${race.date}T${race.time}:00`);
+  const diff   = target - new Date();
+  if (diff <= 0) { ['d','h','m','s'].forEach(k => { const el = document.getElementById('cd-'+k); if(el) el.textContent='00'; }); return; }
+  const vals = {
+    d: Math.floor(diff / 86400000),
+    h: Math.floor((diff % 86400000) / 3600000),
+    m: Math.floor((diff % 3600000) / 60000),
+    s: Math.floor((diff % 60000) / 1000),
+  };
+  Object.entries(vals).forEach(([k,v]) => {
+    const el = document.getElementById('cd-'+k);
+    if (el) el.textContent = String(v).padStart(2,'0');
+  });
+}
+
+initNextRace();
+setInterval(updateCountdown, 1000);
+updateCountdown();
+
+// ─── NEWS (RSS via rss2json) ─────────────────────
+const RSS = 'https://www.motorsport.com/rss/f1/news/';
+const RSS_API = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(RSS)}&api_key=public&count=8`;
+
+const FALLBACK = [
+  { title:"Verstappen lidera el campeonato con otra victoria dominante", category:"Carrera",    pubDate:"", description:"El neerlandés sigue imparable sumando puntos en la temporada 2025 con una actuación de alto nivel.", link:"#" },
+  { title:"Norris no da por perdida la batalla por el título",           category:"Campeonato", pubDate:"", description:"McLaren tiene el coche más rápido y Lando no piensa rendirse frente a Max.", link:"#" },
+  { title:"Ferrari trae un sidepod rediseñado para la próxima carrera", category:"Técnica",    pubDate:"", description:"La Scuderia apuesta fuerte con una actualización aerodinámica que podría cambiar la jerarquía.", link:"#" },
+  { title:"Hamilton ya habla de Ferrari como su casa definitiva",       category:"Paddock",    pubDate:"", description:"El heptacampeón muestra su confianza en el proyecto italiano para pelear por el título.", link:"#" },
+];
+
+function timeAgo(str) {
+  try {
+    const diff = Date.now() - new Date(str);
+    if (diff < 3600000)   return `Hace ${Math.floor(diff/60000)} min`;
+    if (diff < 86400000)  return `Hace ${Math.floor(diff/3600000)} h`;
+    if (diff < 172800000) return 'Ayer';
+    return new Date(str).toLocaleDateString('es-ES',{day:'numeric',month:'short'});
+  } catch { return ''; }
+}
+
+async function loadHomeNews() {
+  let items = FALLBACK;
+  try {
+    const res  = await fetch(RSS_API);
+    const data = await res.json();
+    if (data.status === 'ok' && data.items?.length) items = data.items;
+  } catch {}
+  renderFeatured(items[0]);
+  renderNewsList(items.slice(1, 5));
+}
+
+function renderFeatured(item) {
+  const el = document.getElementById('home-featured');
+  if (!el) return;
+  const imgUrl = item.enclosure?.link || item.thumbnail || '';
+  const cat    = item.category || CATS[0];
+  const time   = timeAgo(item.pubDate);
+  el.innerHTML = `
+    <div class="gp-news-featured" onclick="${item.link && item.link!='#' ? `window.open('${item.link}','_blank')` : ''}">
+      <div class="gp-news-featured-img">
+        ${imgUrl ? `<img src="${imgUrl}" alt="" onerror="this.style.display='none'">` : ''}
+        <div class="gp-news-featured-cat">${cat}</div>
+        <span style="font-size:40px;opacity:.08;position:absolute;">🏎️</span>
+      </div>
+      <div class="gp-news-featured-body">
+        <div class="gp-news-meta" style="margin-bottom:8px;">
+          <span class="gp-news-source">${item.author || 'F1 News'}</span>
+          <span class="gp-news-time">${time}</span>
+        </div>
+        <div class="gp-news-featured-title">${item.title}</div>
+        <div class="gp-news-desc" style="margin-top:6px;">${(item.description||'').replace(/<[^>]+>/g,'').substring(0,130)}…</div>
+      </div>
+    </div>`;
+}
+
+function renderNewsList(items) {
+  const el = document.getElementById('home-news-list');
+  if (!el) return;
+  el.innerHTML = items.map((item,i) => {
+    const cat  = item.category || CATS[i % CATS.length];
+    const time = timeAgo(item.pubDate);
+    return `
+    <div class="gp-news-item" onclick="${item.link && item.link!='#' ? `window.open('${item.link}','_blank')` : ''}">
+      <div class="gp-news-item-num">0${i+2}</div>
+      <div>
+        <div class="gp-news-item-cat">${cat}</div>
+        <div class="gp-news-item-title">${item.title}</div>
+        <span class="gp-news-time">${time}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+loadHomeNews();
+
+// ─── MINI STANDINGS ──────────────────────────────
+let miniTab = 'drivers';
+
+function switchMiniTab(tab) {
+  miniTab = tab;
+  document.getElementById('mini-tab-d').classList.toggle('active', tab==='drivers');
+  document.getElementById('mini-tab-c').classList.toggle('active', tab==='constructors');
+  renderMiniStandings();
+}
+
+function renderMiniStandings() {
+  const el = document.getElementById('mini-standings');
+  if (!el) return;
+  const data = miniTab === 'drivers' ? DRIVERS : CONSTRUCTORS;
+  el.innerHTML = data.map(item => `
+    <div class="gp-driver-mini-row">
+      <div class="gp-driver-mini-pos ${item.pos<=3?'top':''}">${item.pos}</div>
+      <div class="gp-driver-mini-bar" style="background:${item.color}"></div>
+      <div style="flex:1;">
+        <div class="gp-driver-mini-name">${item.name}</div>
+        <div class="gp-driver-mini-team">${item.team}</div>
+      </div>
+      <div class="gp-driver-mini-pts">${item.pts}</div>
+    </div>`).join('');
+}
+
+renderMiniStandings();
+
+// ─── MOBILE MENU ─────────────────────────────────
+function gpToggleMenu() {
+  const nav = document.getElementById('gp-mobile-nav');
+  const btn = document.getElementById('gp-hamburger');
+  nav.classList.toggle('open');
+  btn.classList.toggle('open');
+}
+</script>
+
+</body>
+</html>

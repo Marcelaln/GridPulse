@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="GridPulse — Calendario F1 2025. Todos los Grandes Premios con sesiones, horarios locales y cuenta regresiva.">
+<title>GridPulse · Calendario F1 2025</title>
+<link rel="stylesheet" href="gridpulse.css">
+<style>
+/* ── CALENDARIO-ONLY STYLES ── */
+
+/* FILTER BAR */
+.cal-filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+}
+
+.cal-filter-btn {
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 8px 18px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--gray);
+  cursor: pointer;
+  border-radius: var(--radius);
+  transition: all var(--transition);
+}
+.cal-filter-btn:hover   { color: var(--white); border-color: var(--border-lit); }
+.cal-filter-btn.active  { background: var(--red); color: white; border-color: var(--red); }
+
+/* MONTH SEPARATOR */
+.cal-month-sep {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 32px 0 16px;
+}
+.cal-month-sep:first-of-type { margin-top: 0; }
+.cal-month-label {
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  color: var(--gray-mid);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.cal-month-line {
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* RACE CARD FULL */
+.race-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--border-mid);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  margin-bottom: 14px;
+  transition: border-color var(--transition), border-left-color var(--transition),
+              transform var(--transition), box-shadow var(--transition);
+}
+.race-card:hover {
+  border-color: var(--border-lit);
+  border-left-color: var(--red);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 28px rgba(232,0,45,0.12);
+}
+.race-card.is-next {
+  border-color: rgba(232,0,45,0.45);
+  border-left-color: var(--red);
+  background: rgba(232,0,45,0.025);
+  box-shadow: 0 0 0 1px rgba(232,0,45,0.1);
+}
+.race-card.is-done {
+  opacity: 0.55;
+  border-left-color: var(--border);
+}
+.race-card.is-done:hover { opacity: 0.78; }
+.race-card.hidden { display: none; }
+
+/* CARD HEADER ROW */
+.rc-header {
+  display: grid;
+  grid-template-columns: 76px 1fr auto;
+  align-items: stretch;
+  cursor: pointer;
+  user-select: none;
+}
+
+.rc-date-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 16px 10px;
+  background: var(--dark);
+  border-right: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.race-card.is-next  .rc-date-box { background: var(--red); }
+.race-card.is-done  .rc-date-box { background: rgba(255,255,255,0.03); }
+
+.rc-day {
+  font-family: var(--font-display);
+  font-size: 1.65rem;
+  font-weight: 900;
+  color: var(--white);
+  line-height: 1;
+}
+.race-card.is-done .rc-day { color: var(--gray-mid); }
+
+.rc-month-str {
+  font-family: var(--font-ui);
+  font-size: 0.56rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.6);
+  margin-top: 2px;
+}
+.race-card.is-done .rc-month-str { color: var(--gray-dark); }
+
+.rc-weekday {
+  font-family: var(--font-ui);
+  font-size: 0.52rem;
+  color: rgba(255,255,255,0.4);
+}
+.race-card.is-done .rc-weekday { color: var(--gray-dark); }
+
+/* INFO */
+.rc-info {
+  padding: 14px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 3px;
+}
+
+.rc-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.rc-round {
+  font-family: var(--font-ui);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  color: var(--gray-mid);
+  text-transform: uppercase;
+}
+
+.rc-sprint-badge {
+  font-family: var(--font-ui);
+  font-size: 0.55rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: var(--gold);
+  background: rgba(212,175,55,0.12);
+  border: 1px solid rgba(212,175,55,0.3);
+  padding: 2px 7px;
+  border-radius: 2px;
+  text-transform: uppercase;
+}
+
+.rc-done-badge {
+  font-family: var(--font-ui);
+  font-size: 0.55rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: var(--gray-dark);
+  background: var(--border);
+  padding: 2px 7px;
+  border-radius: 2px;
+  text-transform: uppercase;
+}
+
+.rc-next-badge {
+  font-family: var(--font-ui);
+  font-size: 0.55rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: var(--red);
+  background: rgba(232,0,45,0.12);
+  border: 1px solid rgba(232,0,45,0.3);
+  padding: 2px 7px;
+  border-radius: 2px;
+  text-transform: uppercase;
+  animation: gp-pulse 2s ease infinite;
+}
+
+.rc-name {
+  font-family: var(--font-ui);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--white);
+  line-height: 1.2;
+}
+.race-card.is-done .rc-name { color: var(--gray); }
+
+.rc-circuit {
+  font-size: 0.76rem;
+  color: var(--gray-mid);
+}
+
+/* RIGHT SIDE */
+.rc-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 14px 20px;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.rc-race-time {
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--white);
+}
+.race-card.is-done .rc-race-time { color: var(--gray-mid); }
+
+.rc-tz {
+  font-family: var(--font-ui);
+  font-size: 0.58rem;
+  color: var(--gray-mid);
+  letter-spacing: 0.1em;
+  text-align: right;
+}
+
+.rc-toggle-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--gray-mid);
+  width: 28px; height: 28px;
+  border-radius: var(--radius);
+  font-size: 0.7rem;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: all var(--transition);
+  flex-shrink: 0;
+}
+.rc-toggle-btn:hover { border-color: var(--red); color: var(--red); }
+.race-card.expanded .rc-toggle-btn { border-color: var(--red); color: var(--red); background: rgba(232,0,45,0.06); }
+
+/* COUNTDOWN BAR (only on next race) */
+.rc-countdown-bar {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 20px;
+  background: rgba(232,0,45,0.06);
+  border-top: 1px solid rgba(232,0,45,0.18);
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.race-card.is-next .rc-countdown-bar { display: flex; }
+
+.rc-cd-label {
+  font-family: var(--font-ui);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  color: var(--gray-mid);
+  text-transform: uppercase;
+}
+
+.rc-cd-blocks {
+  display: flex;
+  gap: 6px;
+}
+
+.rc-cd-block {
+  background: var(--dark);
+  border: 1px solid var(--border);
+  padding: 6px 12px;
+  text-align: center;
+  border-radius: var(--radius);
+  min-width: 50px;
+}
+
+.rc-cd-num {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--red);
+  line-height: 1;
+  display: block;
+}
+
+.rc-cd-sublabel {
+  font-family: var(--font-ui);
+  font-size: 0.48rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: var(--gray-mid);
+  text-transform: uppercase;
+  display: block;
+  margin-top: 2px;
+}
+
+/* SESSIONS PANEL */
+.rc-sessions {
+  display: none;
+  flex-direction: column;
+  gap: 0;
+  border-top: 1px solid var(--border);
+}
+.race-card.expanded .rc-sessions { display: flex; }
+
+.rc-sessions-inner {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 1px;
+  background: var(--border);
+  margin: 0;
+}
+
+.session-block {
+  background: var(--panel-alt);
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: background var(--transition);
+}
+.session-block:hover { background: #1f1f1f; }
+.session-block.session-race { background: rgba(232,0,45,0.04); }
+.session-block.session-race:hover { background: rgba(232,0,45,0.07); }
+
+.session-block__type {
+  font-family: var(--font-ui);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--gray-mid);
+}
+.session-block.session-race .session-block__type { color: var(--red); }
+
+.session-block__datetime {
+  font-family: var(--font-ui);
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--white);
+  line-height: 1.35;
+}
+
+.session-block__local {
+  font-size: 0.68rem;
+  color: var(--gray-mid);
+  font-style: italic;
+}
+
+/* ACTIONS ROW */
+.rc-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 20px;
+  border-top: 1px solid var(--border);
+  background: rgba(0,0,0,0.15);
+  flex-wrap: wrap;
+}
+
+.rc-gcal-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  background: var(--red);
+  color: white;
+  border: none;
+  padding: 9px 18px;
+  cursor: pointer;
+  border-radius: var(--radius);
+  text-decoration: none;
+  transition: background var(--transition);
+}
+.rc-gcal-btn:hover { background: var(--red-dark); }
+
+.rc-remind-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  background: transparent;
+  color: var(--gray);
+  border: 1px solid var(--border-lit);
+  padding: 9px 18px;
+  cursor: pointer;
+  border-radius: var(--radius);
+  transition: all var(--transition);
+}
+.rc-remind-btn:hover          { border-color: var(--red); color: var(--red); }
+.rc-remind-btn.reminded        { border-color: #00c850; color: #00c850; background: rgba(0,200,80,0.06); }
+.rc-remind-btn.reminded:hover  { border-color: #00a040; color: #00a040; }
+
+/* PROGRESS BAR (season) */
+.season-progress {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 20px 24px;
+  margin-bottom: 32px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.sp-label {
+  font-family: var(--font-ui);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  color: var(--gray-mid);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.sp-bar-wrap {
+  flex: 1;
+  height: 6px;
+  background: var(--border);
+  border-radius: 3px;
+  min-width: 100px;
+  overflow: hidden;
+}
+.sp-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--red-dark), var(--red));
+  border-radius: 3px;
+  transition: width 1s cubic-bezier(.4,0,.2,1);
+}
+.sp-nums {
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--white);
+  white-space: nowrap;
+}
+.sp-nums span { color: var(--red); }
+
+/* API ERROR BANNER */
+.api-notice {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(212,175,55,0.06);
+  border: 1px solid rgba(212,175,55,0.2);
+  border-radius: var(--radius);
+  padding: 10px 16px;
+  margin-bottom: 20px;
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  color: var(--gold);
+  letter-spacing: 0.04em;
+}
+
+@media (max-width: 640px) {
+  .rc-header { grid-template-columns: 66px 1fr auto; }
+  .rc-info { padding: 12px 14px; }
+  .rc-right { padding: 12px 14px; }
+  .rc-right .rc-tz { display: none; }
+  .rc-sessions-inner { grid-template-columns: 1fr 1fr; }
+  .season-progress { flex-direction: column; align-items: stretch; gap: 10px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════ HEADER ══════════════════ -->
+<header class="gp-header">
+  <div class="gp-container gp-header-inner">
+    <a href="index.html" class="gp-logo">
+      <div class="gp-logo-mark">
+        <svg viewBox="0 0 24 24" fill="white"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      </div>
+      <span class="gp-logo-text">Grid<span>Pulse</span></span>
+    </a>
+
+    <nav class="gp-nav">
+      <a href="index.html"      class="gp-nav-link">Home</a>
+      <a href="noticias.html"   class="gp-nav-link">Noticias</a>
+      <a href="calendario.html" class="gp-nav-link active">Calendario</a>
+      <a href="standings.html"  class="gp-nav-link">Standings</a>
+      <a href="equipos.html"    class="gp-nav-link">Equipos</a>
+      <a href="pittalk.html"    class="gp-nav-link">Pit Talk</a>
+    </nav>
+
+    <div class="gp-clock-wrap">
+      <div class="gp-live-pill"><div class="gp-live-dot"></div>LIVE</div>
+      <div>
+        <div class="gp-clock" id="gp-clock">--:--:--</div>
+        <div class="gp-clock-date" id="gp-clock-date">---</div>
+      </div>
+    </div>
+
+    <button class="gp-hamburger" id="gp-hamburger" onclick="gpToggleMenu()" aria-label="Menú">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<nav class="gp-mobile-nav" id="gp-mobile-nav">
+  <a href="index.html">🏠 Home</a>
+  <a href="noticias.html">📰 Noticias</a>
+  <a href="calendario.html" class="active">📅 Calendario</a>
+  <a href="standings.html">🏆 Standings</a>
+  <a href="equipos.html">🏎️ Equipos</a>
+  <a href="pittalk.html">💬 Pit Talk</a>
+</nav>
+
+<!-- ══════════════════ MAIN ══════════════════ -->
+<main class="gp-page">
+<div class="gp-container">
+
+  <!-- PAGE HEADER -->
+  <div class="gp-section-header gp-anim-fadeUp">
+    <div>
+      <div class="gp-section-eyebrow">Temporada 2025 · 24 Grandes Premios</div>
+      <div class="gp-section-title">Calendario F1</div>
+    </div>
+    <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+      <span id="api-status" style="font-family:var(--font-ui);font-size:.65rem;letter-spacing:.1em;color:var(--gray-mid);"></span>
+    </div>
+  </div>
+
+  <!-- API NOTICE (shown if fallback) -->
+  <div class="api-notice" id="api-notice" style="display:none;">
+    ⚠️ No se pudo conectar con la API. Mostrando datos locales de la temporada 2025.
+  </div>
+
+  <!-- SEASON PROGRESS -->
+  <div class="season-progress gp-anim-fadeUp">
+    <span class="sp-label">Temporada 2025</span>
+    <div class="sp-bar-wrap">
+      <div class="sp-bar" id="sp-bar" style="width:0%"></div>
+    </div>
+    <span class="sp-nums" id="sp-nums">— <span>/</span> 24</span>
+  </div>
+
+  <!-- FILTER BAR -->
+  <div class="cal-filter-bar gp-anim-fadeUp">
+    <button class="cal-filter-btn active" onclick="setFilter('all',this)">Todos</button>
+    <button class="cal-filter-btn" onclick="setFilter('upcoming',this)">Próximos</button>
+    <button class="cal-filter-btn" onclick="setFilter('done',this)">Disputados</button>
+    <button class="cal-filter-btn" onclick="setFilter('sprint',this)">Con Sprint</button>
+  </div>
+
+  <!-- LOADING -->
+  <div class="gp-loading" id="cal-loading">
+    <div class="gp-spinner"></div> Cargando calendario oficial…
+  </div>
+
+  <!-- CALENDAR LIST -->
+  <div id="calendario-list"></div>
+
+</div>
+</main>
+
+<!-- ══════════════════ FOOTER ══════════════════ -->
+<footer class="gp-footer">
+  <div class="gp-container">
+    <div class="gp-footer-inner">
+      <div class="gp-footer-brand">
+        <div class="gp-footer-brand-name">Grid<span>Pulse</span></div>
+        <p class="gp-footer-desc">El hub definitivo para fans de la Fórmula 1. Datos vía Jolpica/Ergast API.</p>
+      </div>
+      <div class="gp-footer-col">
+        <h4>Secciones</h4>
+        <ul class="gp-footer-links">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="noticias.html">Noticias</a></li>
+          <li><a href="standings.html">Standings</a></li>
+          <li><a href="equipos.html">Equipos</a></li>
+          <li><a href="pittalk.html">Pit Talk</a></li>
+        </ul>
+      </div>
+      <div class="gp-footer-col">
+        <h4>Datos</h4>
+        <ul class="gp-footer-links">
+          <li><a href="https://jolpi.ca" target="_blank">Jolpica API</a></li>
+          <li><a href="https://ergast.com" target="_blank">Ergast F1 API</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="gp-footer-bottom">
+      <span class="gp-footer-copy">© 2025 GridPulse — Para fans, por fans.</span>
+      <span class="gp-footer-tag">FORMULA 1 FAN PAGE</span>
+    </div>
+  </div>
+</footer>
+
+<!-- ══════════════════ SCRIPTS ══════════════════ -->
+<script>
+// ═══════════════════════════════════════════════
+//  CONFIG
+// ═══════════════════════════════════════════════
+// API endpoints — triple fallback
+const OF1_BASE  = 'https://api.openf1.org/v1';
+const JLP_URL   = 'https://api.jolpi.ca/ergast/f1/2025.json';
+const userTZ    = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+// Sprint races 2025
+const SPRINT_ROUNDS = new Set([2, 6, 19, 21, 23]);
+
+// Approx session offsets (days before race Sunday)
+// Race = day 0, Quali = -1, FP3 = -1 (early), FP2 = -2, FP1 = -2 (early)
+// Sprint weekends: SQ = -1, Sprint = -1 (pm), FP1 = -2, Quali = -2 (pm)
+const SESSION_OFFSETS = {
+  normal: [
+    { key:'fp1',   label:'FP1',          dayOffset:-2, hour:13 },
+    { key:'fp2',   label:'FP2',          dayOffset:-2, hour:17 },
+    { key:'fp3',   label:'FP3',          dayOffset:-1, hour:12 },
+    { key:'quali', label:'Clasificación', dayOffset:-1, hour:15 },
+    { key:'race',  label:'Carrera',       dayOffset:0,  hour:15 },
+  ],
+  sprint: [
+    { key:'fp1',    label:'FP1',              dayOffset:-2, hour:13 },
+    { key:'sq',     label:'Sprint Quali',      dayOffset:-2, hour:17 },
+    { key:'sprint', label:'Sprint',            dayOffset:-1, hour:12 },
+    { key:'quali',  label:'Clasificación',     dayOffset:-1, hour:15 },
+    { key:'race',   label:'Carrera',           dayOffset:0,  hour:15 },
+  ],
+};
+
+// Fallback data (used if API fails)
+const FALLBACK_RACES = [
+  { round:"1",  raceName:"Gran Premio de Australia",    Circuit:{ circuitName:"Albert Park Circuit",            Location:{ locality:"Melbourne",   country:"Australia" }},    date:"2025-03-16", time:"05:00:00Z", sprint:false },
+  { round:"2",  raceName:"Gran Premio de China",         Circuit:{ circuitName:"Shanghai International Circuit",  Location:{ locality:"Shanghai",    country:"China" }},        date:"2025-03-23", time:"07:00:00Z", sprint:true  },
+  { round:"3",  raceName:"Gran Premio de Japón",         Circuit:{ circuitName:"Suzuka Circuit",                  Location:{ locality:"Suzuka",      country:"Japan" }},        date:"2025-04-06", time:"05:00:00Z", sprint:false },
+  { round:"4",  raceName:"Gran Premio de Baréin",        Circuit:{ circuitName:"Bahrain International Circuit",   Location:{ locality:"Sakhir",      country:"Bahrain" }},      date:"2025-04-13", time:"15:00:00Z", sprint:false },
+  { round:"5",  raceName:"Gran Premio de Arabia Saudí",  Circuit:{ circuitName:"Jeddah Corniche Circuit",         Location:{ locality:"Jeddah",      country:"Saudi Arabia" }}, date:"2025-04-20", time:"17:00:00Z", sprint:false },
+  { round:"6",  raceName:"Gran Premio de Miami",         Circuit:{ circuitName:"Miami International Autodrome",   Location:{ locality:"Miami",       country:"USA" }},          date:"2025-05-04", time:"19:00:00Z", sprint:true  },
+  { round:"7",  raceName:"Gran Premio de Emilia-Romaña", Circuit:{ circuitName:"Autodromo Enzo e Dino Ferrari",   Location:{ locality:"Imola",       country:"Italy" }},        date:"2025-05-18", time:"13:00:00Z", sprint:false },
+  { round:"8",  raceName:"Gran Premio de Mónaco",        Circuit:{ circuitName:"Circuit de Monaco",               Location:{ locality:"Monte-Carlo", country:"Monaco" }},       date:"2025-05-25", time:"13:00:00Z", sprint:false },
+  { round:"9",  raceName:"Gran Premio de España",        Circuit:{ circuitName:"Circuit de Barcelona-Catalunya",  Location:{ locality:"Montmeló",    country:"Spain" }},        date:"2025-06-01", time:"13:00:00Z", sprint:false },
+  { round:"10", raceName:"Gran Premio de Canadá",        Circuit:{ circuitName:"Circuit Gilles Villeneuve",       Location:{ locality:"Montreal",    country:"Canada" }},       date:"2025-06-15", time:"18:00:00Z", sprint:false },
+  { round:"11", raceName:"Gran Premio de Austria",       Circuit:{ circuitName:"Red Bull Ring",                   Location:{ locality:"Spielberg",   country:"Austria" }},      date:"2025-06-29", time:"13:00:00Z", sprint:false },
+  { round:"12", raceName:"Gran Premio de Gran Bretaña",  Circuit:{ circuitName:"Silverstone Circuit",             Location:{ locality:"Silverstone", country:"UK" }},           date:"2025-07-06", time:"14:00:00Z", sprint:false },
+  { round:"13", raceName:"Gran Premio de Bélgica",       Circuit:{ circuitName:"Circuit de Spa-Francorchamps",    Location:{ locality:"Spa",         country:"Belgium" }},      date:"2025-07-27", time:"13:00:00Z", sprint:false },
+  { round:"14", raceName:"Gran Premio de Hungría",       Circuit:{ circuitName:"Hungaroring",                     Location:{ locality:"Budapest",    country:"Hungary" }},      date:"2025-08-03", time:"13:00:00Z", sprint:false },
+  { round:"15", raceName:"Gran Premio de los Países Bajos", Circuit:{ circuitName:"Circuit Zandvoort",            Location:{ locality:"Zandvoort",   country:"Netherlands" }},  date:"2025-08-31", time:"13:00:00Z", sprint:false },
+  { round:"16", raceName:"Gran Premio de Italia",        Circuit:{ circuitName:"Autodromo Nazionale di Monza",    Location:{ locality:"Monza",       country:"Italy" }},        date:"2025-09-07", time:"13:00:00Z", sprint:false },
+  { round:"17", raceName:"Gran Premio de Azerbaiyán",    Circuit:{ circuitName:"Baku City Circuit",               Location:{ locality:"Baku",        country:"Azerbaijan" }},   date:"2025-09-21", time:"11:00:00Z", sprint:false },
+  { round:"18", raceName:"Gran Premio de Singapur",      Circuit:{ circuitName:"Marina Bay Street Circuit",       Location:{ locality:"Singapore",   country:"Singapore" }},    date:"2025-10-05", time:"08:00:00Z", sprint:false },
+  { round:"19", raceName:"Gran Premio de EE. UU.",       Circuit:{ circuitName:"Circuit of The Americas",         Location:{ locality:"Austin",      country:"USA" }},          date:"2025-10-19", time:"19:00:00Z", sprint:true  },
+  { round:"20", raceName:"Gran Premio de México",        Circuit:{ circuitName:"Autodromo Hermanos Rodriguez",    Location:{ locality:"Mexico City", country:"Mexico" }},       date:"2025-10-26", time:"20:00:00Z", sprint:false },
+  { round:"21", raceName:"Gran Premio de Brasil",        Circuit:{ circuitName:"Autodromo Jose Carlos Pace",      Location:{ locality:"São Paulo",   country:"Brazil" }},       date:"2025-11-09", time:"17:00:00Z", sprint:true  },
+  { round:"22", raceName:"Gran Premio de Las Vegas",     Circuit:{ circuitName:"Las Vegas Strip Street Circuit",  Location:{ locality:"Las Vegas",   country:"USA" }},          date:"2025-11-22", time:"06:00:00Z", sprint:false },
+  { round:"23", raceName:"Gran Premio de Qatar",         Circuit:{ circuitName:"Losail International Circuit",    Location:{ locality:"Lusail",      country:"Qatar" }},        date:"2025-11-30", time:"15:00:00Z", sprint:true  },
+  { round:"24", raceName:"Gran Premio de Abu Dabi",      Circuit:{ circuitName:"Yas Marina Circuit",              Location:{ locality:"Abu Dhabi",   country:"UAE" }},          date:"2025-12-07", time:"13:00:00Z", sprint:false },
+];
+
+const MONTHS_ES   = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const MONTHS_S    = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+const WEEKDAYS    = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+const FLAG_MAP = {
+  'Australia':'🇦🇺','China':'🇨🇳','Japan':'🇯🇵','Bahrain':'🇧🇭','Saudi Arabia':'🇸🇦',
+  'USA':'🇺🇸','Italy':'🇮🇹','Monaco':'🇲🇨','Spain':'🇪🇸','Canada':'🇨🇦',
+  'Austria':'🇦🇹','UK':'🇬🇧','Belgium':'🇧🇪','Hungary':'🇭🇺','Netherlands':'🇳🇱',
+  'Azerbaijan':'🇦🇿','Singapore':'🇸🇬','Mexico':'🇲🇽','Brazil':'🇧🇷',
+  'Qatar':'🇶🇦','UAE':'🇦🇪','United Kingdom':'🇬🇧',
+};
+
+// ═══════════════════════════════════════════════
+//  CLOCK
+// ═══════════════════════════════════════════════
+function updateClock() {
+  const now = new Date();
+  const pad = n => String(n).padStart(2,'0');
+  const c = document.getElementById('gp-clock');
+  const d = document.getElementById('gp-clock-date');
+  if (c) c.textContent = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+  if (d) {
+    const ms = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+    d.textContent = `${WEEKDAYS[now.getDay()]} ${now.getDate()} ${ms[now.getMonth()]}`;
+  }
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ═══════════════════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════════════════
+function parseRaceDate(dateStr, timeStr) {
+  const tStr = timeStr || '13:00:00Z';
+  return new Date(`${dateStr}T${tStr}`);
+}
+
+function formatLocal(dateObj) {
+  return dateObj.toLocaleString('es-ES', {
+    timeZone: userTZ,
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
+function formatLocalShort(dateObj) {
+  return dateObj.toLocaleString('es-ES', {
+    timeZone: userTZ,
+    day: 'numeric',
+    month: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
+function gcalLink(title, startISO, durationH = 2) {
+  const start = new Date(startISO);
+  const end   = new Date(start.getTime() + durationH * 3600000);
+  const fmt   = d => d.toISOString().replace(/[-:.]/g,'').slice(0,15) + 'Z';
+  return `https://www.google.com/calendar/render?action=TEMPLATE`
+    + `&text=${encodeURIComponent('🏁 ' + title)}`
+    + `&dates=${fmt(start)}/${fmt(end)}`
+    + `&details=${encodeURIComponent('Gran Premio de Fórmula 1 · GridPulse')}`
+    + `&sf=true&output=xml`;
+}
+
+function buildSessions(race, isSprint) {
+  const raceDate   = parseRaceDate(race.date, race.time);
+  const offsets    = isSprint ? SESSION_OFFSETS.sprint : SESSION_OFFSETS.normal;
+  return offsets.map(s => {
+    const d = new Date(raceDate);
+    d.setDate(d.getDate() + s.dayOffset);
+    d.setUTCHours(s.hour, 0, 0, 0);
+    return { ...s, date: d };
+  });
+}
+
+function getFlag(country) {
+  return FLAG_MAP[country] || '🏁';
+}
+
+// Countdown string
+function countdownStr(targetDate) {
+  const diff = targetDate - new Date();
+  if (diff <= 0) return 'EN VIVO 🟢';
+  const d = Math.floor(diff / 86400000);
+  const h = Math.floor((diff % 86400000) / 3600000);
+  const m = Math.floor((diff % 3600000) / 60000);
+  const s = Math.floor((diff % 60000) / 1000);
+  return { d, h, m, s };
+}
+
+// Reminder localStorage
+function isReminded(round) {
+  try { return JSON.parse(localStorage.getItem('gp_reminded') || '[]').includes(round); } catch { return false; }
+}
+function toggleReminder(round, btn) {
+  try {
+    let list = JSON.parse(localStorage.getItem('gp_reminded') || '[]');
+    if (list.includes(round)) {
+      list = list.filter(r => r !== round);
+      btn.classList.remove('reminded');
+      btn.innerHTML = '🔔 Recordarme';
+    } else {
+      list.push(round);
+      btn.classList.add('reminded');
+      btn.innerHTML = '✅ Guardado';
+    }
+    localStorage.setItem('gp_reminded', JSON.stringify(list));
+  } catch {}
+}
+
+// ═══════════════════════════════════════════════
+//  RENDER A RACE CARD
+// ═══════════════════════════════════════════════
+let nextRaceDate = null;
+let countdownInterval = null;
+
+function renderRaceCard(race, isNext, isDone) {
+  const raceDate    = parseRaceDate(race.date, race.time);
+  const isSprint    = race.sprint || SPRINT_ROUNDS.has(parseInt(race.round));
+  const sessions    = buildSessions(race, isSprint);
+  const flag        = getFlag(race.Circuit.Location.country);
+  const d           = raceDate;
+  const reminded    = isReminded(race.round);
+
+  const card = document.createElement('div');
+  card.className = `race-card${isNext ? ' is-next' : ''}${isDone ? ' is-done' : ''}`;
+  card.dataset.round  = race.round;
+  card.dataset.sprint = isSprint ? '1' : '0';
+  card.dataset.done   = isDone ? '1' : '0';
+
+  // Build sessions HTML
+  const sessionsHTML = sessions.map(s => {
+    const localStr = formatLocal(s.date);
+    const isRace   = s.key === 'race';
+    return `
+      <div class="session-block ${isRace ? 'session-race' : ''}">
+        <div class="session-block__type">${s.label}</div>
+        <div class="session-block__datetime">${localStr}</div>
+        <div class="session-block__local">Tu zona: ${userTZ.replace('_',' ')}</div>
+      </div>`;
+  }).join('');
+
+  // Countdown blocks placeholder (only for next)
+  const cdHTML = isNext ? `
+    <div class="rc-countdown-bar" id="cd-bar-${race.round}">
+      <span class="rc-cd-label">⏱ Cuenta regresiva</span>
+      <div class="rc-cd-blocks">
+        <div class="rc-cd-block"><span class="rc-cd-num" id="cd-${race.round}-d">--</span><span class="rc-cd-sublabel">días</span></div>
+        <div class="rc-cd-block"><span class="rc-cd-num" id="cd-${race.round}-h">--</span><span class="rc-cd-sublabel">hrs</span></div>
+        <div class="rc-cd-block"><span class="rc-cd-num" id="cd-${race.round}-m">--</span><span class="rc-cd-sublabel">min</span></div>
+        <div class="rc-cd-block"><span class="rc-cd-num" id="cd-${race.round}-s">--</span><span class="rc-cd-sublabel">seg</span></div>
+      </div>
+    </div>` : '';
+
+  card.innerHTML = `
+    <!-- CLICKABLE HEADER -->
+    <div class="rc-header" onclick="toggleCard(this.closest('.race-card'))">
+      <div class="rc-date-box">
+        <div class="rc-day">${d.getUTCDate()}</div>
+        <div class="rc-month-str">${MONTHS_S[d.getUTCMonth()]}</div>
+        <div class="rc-weekday">${WEEKDAYS[d.getUTCDay()]}</div>
+      </div>
+
+      <div class="rc-info">
+        <div class="rc-meta">
+          <span class="rc-round">Ronda ${race.round}</span>
+          ${isSprint  ? '<span class="rc-sprint-badge">⚡ Sprint</span>' : ''}
+          ${isDone    ? '<span class="rc-done-badge">✓ Finalizado</span>' : ''}
+          ${isNext    ? '<span class="rc-next-badge">▶ Próxima</span>' : ''}
+        </div>
+        <div class="rc-name">${flag} ${race.raceName}</div>
+        <div class="rc-circuit">${race.Circuit.circuitName} · ${race.Circuit.Location.locality}</div>
+      </div>
+
+      <div class="rc-right">
+        <div class="rc-race-time">${String(d.getUTCHours()).padStart(2,'0')}:${String(d.getUTCMinutes()).padStart(2,'0')}</div>
+        <div class="rc-tz">UTC</div>
+        <div class="rc-race-time" style="font-size:.72rem;color:var(--gray-mid);">${formatLocalShort(d)}</div>
+        <button class="rc-toggle-btn" title="Ver sesiones" aria-label="Expandir">▼</button>
+      </div>
+    </div>
+
+    <!-- COUNTDOWN (solo next) -->
+    ${cdHTML}
+
+    <!-- SESSIONS -->
+    <div class="rc-sessions">
+      <div class="rc-sessions-inner">${sessionsHTML}</div>
+      <div class="rc-actions">
+        <a class="rc-gcal-btn"
+           href="${gcalLink(race.raceName, `${race.date}T${race.time || '13:00:00Z'}`)}"
+           target="_blank" rel="noopener">
+          📅 Añadir a Google Calendar
+        </a>
+        <button class="rc-remind-btn ${reminded ? 'reminded' : ''}"
+                id="remind-${race.round}"
+                onclick="toggleReminder('${race.round}', this)">
+          ${reminded ? '✅ Guardado' : '🔔 Recordarme'}
+        </button>
+      </div>
+    </div>`;
+
+  return card;
+}
+
+// Toggle expand
+function toggleCard(card) {
+  const isOpen = card.classList.contains('expanded');
+  // Close all first
+  document.querySelectorAll('.race-card.expanded').forEach(c => {
+    c.classList.remove('expanded');
+    const btn = c.querySelector('.rc-toggle-btn');
+    if (btn) btn.textContent = '▼';
+  });
+  if (!isOpen) {
+    card.classList.add('expanded');
+    const btn = card.querySelector('.rc-toggle-btn');
+    if (btn) btn.textContent = '▲';
+  }
+}
+
+// ═══════════════════════════════════════════════
+//  SEASON PROGRESS
+// ═══════════════════════════════════════════════
+function updateProgress(races) {
+  const now   = new Date();
+  const done  = races.filter(r => parseRaceDate(r.date, r.time) < now).length;
+  const total = races.length;
+  const pct   = Math.round((done / total) * 100);
+  const bar   = document.getElementById('sp-bar');
+  const nums  = document.getElementById('sp-nums');
+  if (bar)  bar.style.width = pct + '%';
+  if (nums) nums.innerHTML  = `${done} <span>/ ${total}</span>`;
+}
+
+// ═══════════════════════════════════════════════
+//  COUNTDOWN FOR NEXT RACE
+// ═══════════════════════════════════════════════
+function startCountdown(round, targetDate) {
+  if (countdownInterval) clearInterval(countdownInterval);
+  function tick() {
+    const diff = targetDate - new Date();
+    if (diff <= 0) {
+      ['d','h','m','s'].forEach(k => {
+        const el = document.getElementById(`cd-${round}-${k}`);
+        if (el) el.textContent = 'EN VIVO';
+      });
+      clearInterval(countdownInterval);
+      return;
+    }
+    const vals = {
+      d: Math.floor(diff / 86400000),
+      h: Math.floor((diff % 86400000) / 3600000),
+      m: Math.floor((diff % 3600000) / 60000),
+      s: Math.floor((diff % 60000) / 1000),
+    };
+    Object.entries(vals).forEach(([k,v]) => {
+      const el = document.getElementById(`cd-${round}-${k}`);
+      if (el) el.textContent = String(v).padStart(2,'0');
+    });
+  }
+  tick();
+  countdownInterval = setInterval(tick, 1000);
+}
+
+// ═══════════════════════════════════════════════
+//  FILTER
+// ═══════════════════════════════════════════════
+let currentFilter = 'all';
+
+function setFilter(filter, btn) {
+  currentFilter = filter;
+  document.querySelectorAll('.cal-filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.race-card').forEach(card => {
+    const isDone   = card.dataset.done   === '1';
+    const isSprint = card.dataset.sprint === '1';
+    let show = true;
+    if (filter === 'upcoming') show = !isDone;
+    if (filter === 'done')     show = isDone;
+    if (filter === 'sprint')   show = isSprint;
+    card.classList.toggle('hidden', !show);
+  });
+}
+
+// ═══════════════════════════════════════════════
+//  RENDER FULL CALENDAR
+// ═══════════════════════════════════════════════
+function renderCalendar(races) {
+  const container = document.getElementById('calendario-list');
+  container.innerHTML = '';
+  const now = new Date();
+
+  // Find next race
+  const nextRace = races.find(r => parseRaceDate(r.date, r.time) > now);
+
+  updateProgress(races);
+
+  let currentMonth = -1;
+
+  races.forEach(race => {
+    const raceDate = parseRaceDate(race.date, race.time);
+    const isDone   = raceDate < now;
+    const isNext   = nextRace && race.round === nextRace.round;
+    const month    = raceDate.getUTCMonth();
+
+    // Month separator
+    if (month !== currentMonth) {
+      currentMonth = month;
+      const sep = document.createElement('div');
+      sep.className = 'cal-month-sep';
+      sep.innerHTML = `<span class="cal-month-label">${MONTHS_ES[month]}</span><div class="cal-month-line"></div>`;
+      container.appendChild(sep);
+    }
+
+    const card = renderRaceCard(race, isNext, isDone);
+    container.appendChild(card);
+
+    // Start countdown for next race
+    if (isNext) {
+      nextRaceDate = raceDate;
+      setTimeout(() => startCountdown(race.round, raceDate), 100);
+      // Auto-expand next race
+      setTimeout(() => {
+        toggleCard(card);
+      }, 200);
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════
+//  LOAD API
+// ═══════════════════════════════════════════════
+// ── Normalize OpenF1 meetings → Ergast-compatible shape ──
+function normOpenF1Calendar(meetings, sessions) {
+  return meetings.map(m => {
+    // Find race session for this meeting
+    const race = sessions.find(s =>
+      s.meeting_key === m.meeting_key &&
+      s.session_type === 'Race'
+    );
+    const isSprint = sessions.some(s =>
+      s.meeting_key === m.meeting_key &&
+      s.session_type === 'Sprint'
+    );
+    const raceDate = race ? race.date_start?.slice(0,10) : m.date_start?.slice(0,10);
+    const raceTime = race ? (new Date(race.date_start).toISOString().slice(11,19)) : '13:00:00Z';
+    return {
+      round:    String(m.meeting_number || m.meeting_key),
+      raceName: m.meeting_official_name || m.meeting_name || `Round ${m.meeting_key}`,
+      Circuit: {
+        circuitName: m.circuit_short_name || m.location || '—',
+        Location: {
+          locality: m.location   || '—',
+          country:  m.country_name || '—',
+        },
+      },
+      date:   raceDate  || m.date_start?.slice(0,10),
+      time:   raceTime,
+      sprint: isSprint,
+    };
+  }).filter(r => r.date).sort((a,b) => new Date(a.date) - new Date(b.date));
+}
+
+async function loadFromOpenF1Cal() {
+  const [mRes, sRes] = await Promise.all([
+    fetch(`${OF1_BASE}/meetings?year=2025`, { signal: AbortSignal.timeout(6000) }),
+    fetch(`${OF1_BASE}/sessions?year=2025`, { signal: AbortSignal.timeout(6000) }),
+  ]);
+  if (!mRes.ok || !sRes.ok) throw new Error('OpenF1 cal error');
+  const [meetings, sessions] = await Promise.all([mRes.json(), sRes.json()]);
+  if (!meetings?.length) throw new Error('no meetings');
+  return { races: normOpenF1Calendar(meetings, sessions), source: 'openf1' };
+}
+
+async function loadFromJolpikaCal() {
+  const res = await fetch(JLP_URL, { signal: AbortSignal.timeout(7000) });
+  if (!res.ok) throw new Error('Jolpika error');
+  const data = await res.json();
+  const races = data?.MRData?.RaceTable?.Races;
+  if (!races?.length) throw new Error('no races');
+  return { races, source: 'jolpika' };
+}
+
+async function loadCalendar() {
+  const loading = document.getElementById('cal-loading');
+  const notice  = document.getElementById('api-notice');
+  const status  = document.getElementById('api-status');
+
+  let result = null;
+
+  // 1. Try OpenF1
+  try {
+    result = await loadFromOpenF1Cal();
+    if (status) status.textContent = '🟢 OpenF1 API · Tiempo real';
+  } catch(e1) {
+    // 2. Try Jolpika
+    try {
+      result = await loadFromJolpikaCal();
+      if (notice) notice.style.display = 'flex';
+      if (notice) notice.textContent   = '🟡 OpenF1 no disponible · Usando Jolpica/Ergast como respaldo.';
+      if (status) status.textContent   = '🟡 Jolpica/Ergast API';
+    } catch(e2) {
+      // 3. Local fallback
+      result = { races: FALLBACK_RACES, source: 'local' };
+      if (notice) { notice.style.display = 'flex'; }
+      if (status) status.textContent = '⚪ Datos locales 2025';
+    }
+  }
+
+  loading.style.display = 'none';
+  renderCalendar(result.races);
+}
+
+loadCalendar();
+
+// ═══════════════════════════════════════════════
+//  MOBILE MENU
+// ═══════════════════════════════════════════════
+function gpToggleMenu() {
+  document.getElementById('gp-mobile-nav').classList.toggle('open');
+  document.getElementById('gp-hamburger').classList.toggle('open');
+}
+</script>
+</body>
+</html>

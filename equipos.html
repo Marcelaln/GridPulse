@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GridPulse · Equipos F1 2025</title>
+<link rel="stylesheet" href="gridpulse.css">
+<style>
+/* ── TEAM TABS ── */
+.team-tabs-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 32px;
+}
+
+.team-tab-btn {
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 9px 18px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--gray);
+  cursor: pointer;
+  clip-path: polygon(0 0, calc(100% - 7px) 0, 100% 100%, 7px 100%);
+  transition: all var(--transition);
+  position: relative;
+}
+.team-tab-btn:hover { color: var(--white); border-color: var(--border-lit); }
+.team-tab-btn.active { color: white; }
+
+/* ── TEAM CARD ── */
+.team-card { animation: gp-fadeIn 0.35s ease; }
+
+.team-hero {
+  position: relative;
+  padding: 36px 40px;
+  overflow: hidden;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  min-height: 180px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.team-hero-bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.team-hero-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(90deg, transparent, transparent 49px, rgba(255,255,255,0.04) 50px),
+    repeating-linear-gradient(0deg, transparent, transparent 49px, rgba(255,255,255,0.04) 50px);
+  pointer-events: none;
+}
+
+.team-hero-watermark {
+  position: absolute;
+  right: -10px; bottom: -20px;
+  font-family: var(--font-display);
+  font-size: 120px;
+  font-weight: 900;
+  color: white;
+  opacity: 0.05;
+  line-height: 1;
+  pointer-events: none;
+  letter-spacing: -0.05em;
+  user-select: none;
+}
+
+.team-hero-content { position: relative; z-index: 2; }
+
+.team-hero-name {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 4vw, 3rem);
+  font-weight: 900;
+  color: white;
+  line-height: 1;
+  text-shadow: 0 2px 20px rgba(0,0,0,0.5);
+  letter-spacing: 0.02em;
+}
+
+.team-hero-chassis {
+  font-family: var(--font-ui);
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: rgba(255,255,255,0.65);
+  letter-spacing: 0.15em;
+  margin-top: 6px;
+  text-transform: uppercase;
+}
+
+.team-hero-right {
+  position: relative;
+  z-index: 2;
+  text-align: right;
+}
+
+.team-hero-pts {
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 900;
+  color: white;
+  line-height: 1;
+  text-shadow: 0 2px 20px rgba(0,0,0,0.4);
+}
+
+.team-hero-pts-label {
+  font-family: var(--font-ui);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.25em;
+  color: rgba(255,255,255,0.6);
+  text-transform: uppercase;
+}
+
+/* TEAM BODY */
+.team-body {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+}
+
+.team-body-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+}
+
+.team-section {
+  padding: 28px 32px;
+  border-right: 1px solid var(--border);
+}
+.team-section:last-child { border-right: none; }
+
+.team-section-title {
+  font-family: var(--font-ui);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  color: var(--gray-mid);
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.team-section-title::before {
+  content: '';
+  width: 3px; height: 12px;
+  border-radius: 2px;
+  display: block;
+  flex-shrink: 0;
+}
+
+/* DRIVERS */
+.driver-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+}
+.driver-card:last-child { border-bottom: none; }
+
+.driver-number-badge {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 900;
+  line-height: 1;
+  min-width: 48px;
+  text-align: center;
+}
+
+.driver-card-info { flex: 1; }
+
+.driver-card-name {
+  font-family: var(--font-ui);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--white);
+  line-height: 1.2;
+}
+
+.driver-card-nat {
+  font-size: 0.7rem;
+  color: var(--gray-mid);
+  margin-top: 2px;
+  letter-spacing: 0.04em;
+}
+
+.driver-card-pts {
+  text-align: right;
+}
+.driver-card-pts-num {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--white);
+  line-height: 1;
+}
+.driver-card-pts-label {
+  font-family: var(--font-ui);
+  font-size: 0.55rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: var(--gray-mid);
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+/* STATS GRID */
+.team-stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.team-stat-box {
+  background: var(--dark);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  transition: border-color var(--transition);
+}
+.team-stat-box:hover { border-color: var(--border-lit); }
+
+.team-stat-val {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--white);
+  line-height: 1;
+}
+
+.team-stat-key {
+  font-family: var(--font-ui);
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: var(--gray-mid);
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+
+/* ABOUT */
+.team-about {
+  padding: 20px 32px;
+  border-top: 1px solid var(--border);
+  background: rgba(0,0,0,0.1);
+}
+.team-about p {
+  font-size: 0.875rem;
+  color: var(--gray);
+  line-height: 1.7;
+}
+
+/* CHAMPIONSHIP BAR */
+.champ-bar-wrap {
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.champ-bar-track {
+  flex: 1;
+  height: 6px;
+  background: var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.champ-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  width: 0;
+  transition: width 1.2s cubic-bezier(.4,0,.2,1);
+}
+.champ-bar-label {
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--white);
+  min-width: 30px;
+  text-align: right;
+}
+
+/* POSITION BADGE */
+.team-pos-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: white;
+  padding: 4px 14px;
+  clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 100%, 6px 100%);
+  text-transform: uppercase;
+}
+
+@media (max-width: 768px) {
+  .team-body-grid { grid-template-columns: 1fr; }
+  .team-section { border-right: none; border-bottom: 1px solid var(--border); }
+  .team-section:last-child { border-bottom: none; }
+  .team-hero { padding: 24px 20px; }
+  .team-stats-grid { grid-template-columns: 1fr 1fr; }
+  .team-about { padding: 18px 20px; }
+}
+</style>
+</head>
+<body>
+
+<header class="gp-header">
+  <div class="gp-container gp-header-inner">
+    <a href="index.html" class="gp-logo">
+      <div class="gp-logo-mark"><svg viewBox="0 0 24 24" fill="white"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+      <span class="gp-logo-text">Grid<span>Pulse</span></span>
+    </a>
+    <nav class="gp-nav">
+      <a href="index.html"      class="gp-nav-link">Home</a>
+      <a href="noticias.html"   class="gp-nav-link">Noticias</a>
+      <a href="calendario.html" class="gp-nav-link">Calendario</a>
+      <a href="standings.html"  class="gp-nav-link">Standings</a>
+      <a href="equipos.html"    class="gp-nav-link active">Equipos</a>
+      <a href="pittalk.html"    class="gp-nav-link">Pit Talk</a>
+    </nav>
+    <div class="gp-clock-wrap">
+      <div class="gp-live-pill"><div class="gp-live-dot"></div>LIVE</div>
+      <div>
+        <div class="gp-clock" id="gp-clock">--:--:--</div>
+        <div class="gp-clock-date" id="gp-clock-date">---</div>
+      </div>
+    </div>
+    <button class="gp-hamburger" id="gp-hamburger" onclick="gpToggleMenu()"><span></span><span></span><span></span></button>
+  </div>
+</header>
+
+<nav class="gp-mobile-nav" id="gp-mobile-nav">
+  <a href="index.html">🏠 Home</a>
+  <a href="noticias.html">📰 Noticias</a>
+  <a href="calendario.html">📅 Calendario</a>
+  <a href="standings.html">🏆 Standings</a>
+  <a href="equipos.html" class="active">🏎️ Equipos</a>
+  <a href="pittalk.html">💬 Pit Talk</a>
+</nav>
+
+<main class="gp-page">
+<div class="gp-container">
+
+  <div class="gp-section-header gp-anim-fadeUp">
+    <div>
+      <div class="gp-section-eyebrow">Parrilla 2025 · 10 Equipos</div>
+      <div class="gp-section-title">Equipos F1</div>
+    </div>
+  </div>
+
+  <!-- TEAM TABS -->
+  <div class="team-tabs-wrap gp-anim-fadeUp" id="team-tabs"></div>
+
+  <!-- TEAM CARD -->
+  <div id="team-card"></div>
+
+</div>
+</main>
+
+<footer class="gp-footer">
+  <div class="gp-container">
+    <div class="gp-footer-inner">
+      <div class="gp-footer-brand">
+        <div class="gp-footer-brand-name">Grid<span>Pulse</span></div>
+        <p class="gp-footer-desc">Todos los equipos de la parrilla 2025, datos y pilotos en un solo lugar.</p>
+      </div>
+      <div class="gp-footer-col">
+        <h4>Secciones</h4>
+        <ul class="gp-footer-links">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="standings.html">Standings</a></li>
+          <li><a href="calendario.html">Calendario</a></li>
+          <li><a href="pittalk.html">Pit Talk</a></li>
+        </ul>
+      </div>
+      <div class="gp-footer-col">
+        <h4>Fuentes</h4>
+        <ul class="gp-footer-links">
+          <li><a href="https://openf1.org" target="_blank">OpenF1 API</a></li>
+          <li><a href="https://jolpi.ca" target="_blank">Jolpica API</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="gp-footer-bottom">
+      <span class="gp-footer-copy">© 2025 GridPulse — Para fans, por fans.</span>
+      <span class="gp-footer-tag">FORMULA 1 FAN PAGE</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+// ═══════════════════════════════════════════════
+//  TEAMS DATA 2025
+// ═══════════════════════════════════════════════
+const TEAMS = [
+  {
+    id: 'redbull',
+    name: 'Red Bull Racing',
+    short: 'Red Bull',
+    color: '#3671C6',
+    colorDark: '#1a3a6e',
+    gradient: 'linear-gradient(135deg, #060d1f 0%, #0d2145 40%, #1E3860 70%, #3671C6 100%)',
+    chassis: 'RB21',
+    engine: 'Honda RBPT',
+    base: 'Milton Keynes, UK',
+    founded: 2005,
+    championships: 6,
+    pos: 3,
+    pts: 148,
+    wins: 4,
+    drivers: [
+      { name: 'Max Verstappen',  number: 1,  nat: '🇳🇱 Neerlandés',  pts: 136 },
+      { name: 'Yuki Tsunoda',    number: 22, nat: '🇯🇵 Japonés',      pts: 0   },
+    ],
+    about: 'El equipo más dominante de la era híbrida moderna. Cuatro campeonatos consecutivos con Verstappen (2021-2024). Con base en Milton Keynes, Gran Bretaña, y motor Honda RBPT. En 2025 buscan mantenerse en la pelea por el campeonato frente a una McLaren cada vez más fuerte.',
+  },
+  {
+    id: 'mclaren',
+    name: 'McLaren',
+    short: 'McLaren',
+    color: '#FF8000',
+    colorDark: '#7a3c00',
+    gradient: 'linear-gradient(135deg, #1a0e00 0%, #4a2200 40%, #8a4000 70%, #FF8000 100%)',
+    chassis: 'MCL39',
+    engine: 'Mercedes',
+    base: 'Woking, UK',
+    founded: 1966,
+    championships: 8,
+    pos: 1,
+    pts: 221,
+    wins: 3,
+    drivers: [
+      { name: 'Lando Norris',  number: 4,  nat: '🇬🇧 Británico',  pts: 131 },
+      { name: 'Oscar Piastri', number: 81, nat: '🇦🇺 Australiano', pts: 90  },
+    ],
+    about: 'El renacimiento naranja. Tras años de reconstrucción, McLaren volvió a ganar carreras y en 2024 se llevó el campeonato de constructores. En 2025 lidera el campeonato con el MCL39, considerado por muchos el coche más rápido de la parrilla. Norris vs Verstappen promete ser el duelo del año.',
+  },
+  {
+    id: 'ferrari',
+    name: 'Ferrari',
+    short: 'Ferrari',
+    color: '#DC0000',
+    colorDark: '#6b0000',
+    gradient: 'linear-gradient(135deg, #1a0000 0%, #4a0000 40%, #8a0000 70%, #DC0000 100%)',
+    chassis: 'SF-25',
+    engine: 'Ferrari',
+    base: 'Maranello, Italia',
+    founded: 1950,
+    championships: 16,
+    pos: 2,
+    pts: 158,
+    wins: 1,
+    drivers: [
+      { name: 'Charles Leclerc', number: 16, nat: '🇲🇨 Monegasco',  pts: 98 },
+      { name: 'Lewis Hamilton',  number: 44, nat: '🇬🇧 Británico',  pts: 60 },
+    ],
+    about: 'La Scuderia más icónica de la F1. Con 16 campeonatos de constructores y una historia irrepetible, Ferrari apuesta en 2025 por la combinación más mediática: Leclerc + Hamilton. El SF-25 ha mostrado velocidad en clasificación aunque con irregularidades en carrera. Los Tifosi esperan el retorno al trono.',
+  },
+  {
+    id: 'mercedes',
+    name: 'Mercedes',
+    short: 'Mercedes',
+    color: '#00D2BE',
+    colorDark: '#005a52',
+    gradient: 'linear-gradient(135deg, #001a18 0%, #003830 40%, #006055 70%, #00D2BE 100%)',
+    chassis: 'W16',
+    engine: 'Mercedes',
+    base: 'Brackley, UK',
+    founded: 2010,
+    championships: 8,
+    pos: 4,
+    pts: 130,
+    wins: 0,
+    drivers: [
+      { name: 'George Russell',   number: 63, nat: '🇬🇧 Británico', pts: 87 },
+      { name: 'Kimi Antonelli',   number: 12, nat: '🇮🇹 Italiano',  pts: 43 },
+    ],
+    about: 'Ocho campeonatos consecutivos (2014-2021) convirtieron a Mercedes en la dinastía más dominante de la era híbrida. En 2025 presentan al jovencísimo Kimi Antonelli junto a Russell. El W16 ha mejorado pero aún buscan la consistencia perdida. Antonelli, con solo 18 años, es la gran apuesta del equipo flecha.',
+  },
+  {
+    id: 'astonmartin',
+    name: 'Aston Martin',
+    short: 'Aston Martin',
+    color: '#006F62',
+    colorDark: '#003830',
+    gradient: 'linear-gradient(135deg, #001a17 0%, #003028 40%, #005045 70%, #006F62 100%)',
+    chassis: 'AMR25',
+    engine: 'Mercedes',
+    base: 'Silverstone, UK',
+    founded: 2018,
+    championships: 0,
+    pos: 6,
+    pts: 34,
+    wins: 0,
+    drivers: [
+      { name: 'Fernando Alonso', number: 14, nat: '🇪🇸 Español',   pts: 34 },
+      { name: 'Lance Stroll',    number: 18, nat: '🇨🇦 Canadiense', pts: 2  },
+    ],
+    about: 'Verde británico de regreso a la élite. Con la llegada de Fernando Alonso en 2023, Aston Martin vivió su mejor temporada. La nueva fábrica y la alianza con Honda para 2026 auguran un futuro prometedor. En 2025 buscan recuperar el nivel del AMR23 mientras preparan el salto tecnológico del próximo reglamento.',
+  },
+  {
+    id: 'alpine',
+    name: 'Alpine',
+    short: 'Alpine',
+    color: '#0090FF',
+    colorDark: '#003a70',
+    gradient: 'linear-gradient(135deg, #000a1a 0%, #001a40 40%, #003070 70%, #0090FF 100%)',
+    chassis: 'A525',
+    engine: 'Renault',
+    base: 'Enstone, UK / Viry-Châtillon, FR',
+    founded: 2021,
+    championships: 2,
+    pos: 7,
+    pts: 22,
+    wins: 0,
+    drivers: [
+      { name: 'Pierre Gasly',  number: 10, nat: '🇫🇷 Francés',   pts: 16 },
+      { name: 'Jack Doohan',   number: 7,  nat: '🇦🇺 Australiano', pts: 4  },
+    ],
+    about: 'La marca deportiva de Renault en la F1, heredera del legado de dos campeonatos con Fernando Alonso (2005-2006). En 2025 apuestan por la dupla Gasly-Doohan mientras el equipo atraviesa una profunda reestructuración técnica. La A525 ha mostrado destellos de velocidad, pero la consistencia sigue siendo el reto pendiente.',
+  },
+  {
+    id: 'williams',
+    name: 'Williams',
+    short: 'Williams',
+    color: '#37BEDD',
+    colorDark: '#135070',
+    gradient: 'linear-gradient(135deg, #001825 0%, #003550 40%, #0060880 70%, #37BEDD 100%)',
+    chassis: 'FW47',
+    engine: 'Mercedes',
+    base: 'Grove, UK',
+    founded: 1977,
+    championships: 7,
+    pos: 5,
+    pts: 68,
+    wins: 0,
+    drivers: [
+      { name: 'Carlos Sainz',    number: 55, nat: '🇪🇸 Español', pts: 68 },
+      { name: 'Alexander Albon', number: 23, nat: '🇹🇭 Tailandés', pts: 14 },
+    ],
+    about: 'El equipo privado más exitoso de la historia de la Fórmula 1. Siete campeonatos de constructores en los años 80 y 90 con nombres como Mansell, Hill y Villeneuve. La llegada de Carlos Sainz en 2025 ha devuelto el brillo al equipo de Grove. La FW47 es claramente el mejor Williams en años, y los puntos lo demuestran.',
+  },
+  {
+    id: 'haas',
+    name: 'Haas F1 Team',
+    short: 'Haas',
+    color: '#B6BABD',
+    colorDark: '#404040',
+    gradient: 'linear-gradient(135deg, #111111 0%, #252525 40%, #3a3a3a 70%, #B6BABD 100%)',
+    chassis: 'VF-25',
+    engine: 'Ferrari',
+    base: 'Kannapolis, USA / Banbury, UK',
+    founded: 2016,
+    championships: 0,
+    pos: 8,
+    pts: 20,
+    wins: 0,
+    drivers: [
+      { name: 'Esteban Ocon',    number: 31, nat: '🇫🇷 Francés',   pts: 18 },
+      { name: 'Oliver Bearman',  number: 87, nat: '🇬🇧 Británico', pts: 8  },
+    ],
+    about: 'El único equipo estadounidense de la parrilla, fundado por el empresario Gene Haas. Opera con una estrecha alianza con Ferrari en componentes y motor. En 2025 presenta a una joven dupla con Ocon y Bearman, apostando por el talento joven. La popularidad del equipo explotó con la serie documental "Drive to Survive".',
+  },
+  {
+    id: 'racingbulls',
+    name: 'Racing Bulls',
+    short: 'Racing Bulls',
+    color: '#4169E1',
+    colorDark: '#1a2d70',
+    gradient: 'linear-gradient(135deg, #060a18 0%, #0f1a40 40%, #1e3070 70%, #4169E1 100%)',
+    chassis: 'VCARB 02',
+    engine: 'Honda RBPT',
+    base: 'Faenza, Italia',
+    founded: 2006,
+    championships: 0,
+    pos: 9,
+    pts: 16,
+    wins: 0,
+    drivers: [
+      { name: 'Liam Lawson',   number: 30, nat: '🇳🇿 Neozelandés', pts: 12 },
+      { name: 'Isack Hadjar',  number: 6,  nat: '🇫🇷 Francés',     pts: 6  },
+    ],
+    about: 'La academia de Red Bull convertida en equipo propio. Antes conocidos como Toro Rosso y AlphaTauri, los Racing Bulls son el trampolín que ha lanzado a pilotos como Vettel, Ricciardo, Verstappen y Gasly hacia la élite. En 2025 Lawson y Hadjar buscan su lugar en el mapa y atraer la atención de Red Bull principal.',
+  },
+  {
+    id: 'sauber',
+    name: 'Stake F1 / Kick Sauber',
+    short: 'Kick Sauber',
+    color: '#52E252',
+    colorDark: '#1a5c1a',
+    gradient: 'linear-gradient(135deg, #001a00 0%, #0a3a0a 40%, #1a5a1a 70%, #52E252 100%)',
+    chassis: 'C45',
+    engine: 'Ferrari',
+    base: 'Hinwil, Suiza',
+    founded: 1993,
+    championships: 0,
+    pos: 10,
+    pts: 8,
+    wins: 0,
+    drivers: [
+      { name: 'Nico Hülkenberg', number: 27, nat: '🇩🇪 Alemán',    pts: 24 },
+      { name: 'Gabriel Bortoleto', number: 5, nat: '🇧🇷 Brasileño', pts: 2  },
+    ],
+    about: 'La histórica escudería suiza está en plena metamorfosis. En 2026 se convertirá oficialmente en el equipo de fábrica de Audi en la Fórmula 1, marcando el regreso de una marca alemana premium a la máxima categoría. En 2025, Hülkenberg y el campeón de F2 Bortoleto intentan sumar puntos mientras la transición avanza.',
+  },
+];
+
+// ═══════════════════════════════════════════════
+//  CLOCK
+// ═══════════════════════════════════════════════
+(function clock(){
+  const pad = n => String(n).padStart(2,'0');
+  setInterval(()=>{
+    const n = new Date();
+    const c = document.getElementById('gp-clock');
+    const d = document.getElementById('gp-clock-date');
+    if(c) c.textContent = `${pad(n.getHours())}:${pad(n.getMinutes())}:${pad(n.getSeconds())}`;
+    if(d){
+      const ms=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+      const wd=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+      d.textContent=`${wd[n.getDay()]} ${n.getDate()} ${ms[n.getMonth()]}`;
+    }
+  }, 1000);
+})();
+
+// ═══════════════════════════════════════════════
+//  RENDER TABS
+// ═══════════════════════════════════════════════
+function renderTabs(activeIdx = 0) {
+  const wrap = document.getElementById('team-tabs');
+  wrap.innerHTML = TEAMS.map((t, i) => `
+    <button
+      class="team-tab-btn ${i === activeIdx ? 'active' : ''}"
+      id="tab-${t.id}"
+      onclick="selectTeam(${i})"
+      style="${i === activeIdx
+        ? `background:${t.color}33; border-color:${t.color}; color:white;`
+        : ''}"
+    >${t.short}</button>
+  `).join('');
+}
+
+// ═══════════════════════════════════════════════
+//  RENDER TEAM CARD
+// ═══════════════════════════════════════════════
+function selectTeam(idx) {
+  const t = TEAMS[idx];
+
+  // Update tabs
+  TEAMS.forEach((team, i) => {
+    const btn = document.getElementById(`tab-${team.id}`);
+    if (!btn) return;
+    if (i === idx) {
+      btn.classList.add('active');
+      btn.style.background   = team.color + '33';
+      btn.style.borderColor  = team.color;
+      btn.style.color        = 'white';
+    } else {
+      btn.classList.remove('active');
+      btn.style.background  = 'transparent';
+      btn.style.borderColor = 'var(--border)';
+      btn.style.color       = 'var(--gray)';
+    }
+  });
+
+  // Max pts for bar
+  const maxPts = Math.max(...TEAMS.map(x => x.pts));
+
+  // Position label
+  const posLabels = { 1:'🥇 P1', 2:'🥈 P2', 3:'🥉 P3' };
+  const posLabel = posLabels[t.pos] || `P${t.pos}`;
+
+  const card = document.getElementById('team-card');
+  card.style.opacity = '0';
+  card.style.transition = 'opacity 0.25s ease';
+
+  setTimeout(() => {
+    card.innerHTML = `
+    <div class="team-card">
+
+      <!-- HERO BANNER -->
+      <div class="team-hero" style="border:1px solid ${t.color}44; border-bottom:none;">
+        <div class="team-hero-bg" style="background:${t.gradient}"></div>
+        <div class="team-hero-grid"></div>
+        <div class="team-hero-watermark">${t.short.split(' ')[0].toUpperCase()}</div>
+
+        <div class="team-hero-content">
+          <div style="margin-bottom:10px;">
+            <span class="team-pos-badge" style="background:${t.color}44; border:1px solid ${t.color}66;">${posLabel} Constructores</span>
+          </div>
+          <div class="team-hero-name">${t.name}</div>
+          <div class="team-hero-chassis">${t.chassis} · ${t.engine} · ${t.base}</div>
+
+          <!-- Championship progress bar -->
+          <div class="champ-bar-wrap" style="margin-top:16px; max-width:340px;">
+            <div class="champ-bar-track">
+              <div class="champ-bar-fill" id="hero-bar" style="background:${t.color};"></div>
+            </div>
+            <div class="champ-bar-label">${t.pts} pts</div>
+          </div>
+        </div>
+
+        <div class="team-hero-right">
+          <div class="team-hero-pts">${t.pts}</div>
+          <div class="team-hero-pts-label">Puntos 2025</div>
+          <div style="margin-top:8px;">
+            <div style="font-family:var(--font-display);font-size:1.6rem;font-weight:700;color:white;text-align:right;">${t.wins}</div>
+            <div class="team-hero-pts-label">Victorias</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BODY -->
+      <div class="team-body" style="border-color:${t.color}33;">
+        <div class="team-body-grid">
+
+          <!-- DRIVERS -->
+          <div class="team-section">
+            <div class="team-section-title" style="--accent:${t.color}">
+              <span style="width:3px;height:14px;background:${t.color};border-radius:2px;display:block;"></span>
+              Pilotos 2025
+            </div>
+            ${t.drivers.map(d => `
+            <div class="driver-card">
+              <div class="driver-number-badge" style="color:${t.color};">${d.number}</div>
+              <div class="driver-card-info">
+                <div class="driver-card-name">${d.name}</div>
+                <div class="driver-card-nat">${d.nat}</div>
+              </div>
+              <div class="driver-card-pts">
+                <div class="driver-card-pts-num">${d.pts}</div>
+                <div class="driver-card-pts-label">PTS</div>
+              </div>
+            </div>`).join('')}
+          </div>
+
+          <!-- STATS -->
+          <div class="team-section">
+            <div class="team-section-title">
+              <span style="width:3px;height:14px;background:${t.color};border-radius:2px;display:block;"></span>
+              Datos del Equipo
+            </div>
+            <div class="team-stats-grid">
+              <div class="team-stat-box">
+                <div class="team-stat-val" style="color:${t.color};">${t.pos}</div>
+                <div class="team-stat-key">Posición</div>
+              </div>
+              <div class="team-stat-box">
+                <div class="team-stat-val">${t.championships}</div>
+                <div class="team-stat-key">Campeonatos</div>
+              </div>
+              <div class="team-stat-box">
+                <div class="team-stat-val">${t.engine}</div>
+                <div class="team-stat-key">Motor</div>
+              </div>
+              <div class="team-stat-box">
+                <div class="team-stat-val">${t.founded}</div>
+                <div class="team-stat-key">Fundado</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ABOUT -->
+        <div class="team-about">
+          <div class="team-section-title" style="margin-bottom:12px;">
+            <span style="width:3px;height:14px;background:${t.color};border-radius:2px;display:block;"></span>
+            Sobre el equipo
+          </div>
+          <p>${t.about}</p>
+        </div>
+      </div>
+
+    </div>`;
+
+    // Animate hero bar
+    setTimeout(() => {
+      const bar = document.getElementById('hero-bar');
+      if (bar) bar.style.width = Math.round((t.pts / maxPts) * 100) + '%';
+    }, 80);
+
+    card.style.opacity = '1';
+  }, 120);
+}
+
+// ── INIT ──
+renderTabs(0);
+selectTeam(0);
+
+function gpToggleMenu() {
+  document.getElementById('gp-mobile-nav').classList.toggle('open');
+  document.getElementById('gp-hamburger').classList.toggle('open');
+}
+</script>
+</body>
+</html>

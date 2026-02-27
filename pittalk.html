@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GridPulse · Pit Talk — Comunidad F1</title>
+<link rel="stylesheet" href="gridpulse.css">
+<style>
+/* ── PIT TALK STYLES ── */
+
+.pt-layout {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 28px;
+  align-items: start;
+}
+
+/* NEW POST FORM */
+.pt-new-post {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--red);
+  border-radius: var(--radius-md);
+  padding: 24px;
+  margin-bottom: 28px;
+}
+
+.pt-form-title {
+  font-family: var(--font-ui);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  color: var(--gray);
+  text-transform: uppercase;
+  margin-bottom: 18px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.pt-form-title::before {
+  content: '';
+  width: 3px; height: 12px;
+  background: var(--red);
+  border-radius: 2px;
+  display: block;
+}
+
+.pt-form-row { display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+.pt-form-row-full { margin-bottom: 10px; }
+
+.pt-form-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+
+.pt-tag-select {
+  background: var(--dark);
+  border: 1px solid var(--border);
+  color: var(--gray);
+  padding: 9px 12px;
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  border-radius: var(--radius);
+  cursor: pointer;
+  outline: none;
+  transition: border-color var(--transition);
+}
+.pt-tag-select:focus { border-color: var(--red); }
+
+/* TOPIC CARD */
+.pt-topic {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-left: 4px solid transparent;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  margin-bottom: 14px;
+  transition: border-color var(--transition), border-left-color var(--transition);
+}
+.pt-topic:hover { border-color: var(--border-lit); border-left-color: var(--red); }
+
+.pt-topic-head { padding: 18px 20px; }
+
+.pt-author-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.pt-avatar {
+  width: 38px; height: 38px;
+  border-radius: 2px;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: white;
+  flex-shrink: 0;
+}
+
+.pt-author-name {
+  font-family: var(--font-ui);
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--white);
+}
+
+.pt-time {
+  font-size: 0.67rem;
+  color: var(--gray-mid);
+  margin-left: 2px;
+}
+
+.pt-tag {
+  font-family: var(--font-ui);
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 2px;
+  border: 1px solid;
+}
+.pt-tag-debate    { color: #60a5fa; border-color: rgba(96,165,250,.35); background: rgba(96,165,250,.08); }
+.pt-tag-opinion   { color: var(--gold); border-color: rgba(212,175,55,.35); background: rgba(212,175,55,.08); }
+.pt-tag-tecnica   { color: #a78bfa; border-color: rgba(167,139,250,.35); background: rgba(167,139,250,.08); }
+.pt-tag-humor     { color: #34d399; border-color: rgba(52,211,153,.35); background: rgba(52,211,153,.08); }
+.pt-tag-noticia   { color: var(--red); border-color: rgba(232,0,45,.35); background: rgba(232,0,45,.08); }
+
+.pt-topic-title {
+  font-family: var(--font-ui);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--white);
+  line-height: 1.35;
+  margin-bottom: 8px;
+}
+
+.pt-topic-body {
+  font-size: 0.875rem;
+  color: var(--gray);
+  line-height: 1.7;
+}
+
+/* ACTIONS */
+.pt-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 11px 20px;
+  border-top: 1px solid var(--border);
+  background: rgba(0,0,0,0.1);
+}
+
+.pt-vote-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--gray);
+  padding: 5px 13px;
+  border-radius: var(--radius);
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.pt-vote-btn:hover  { border-color: var(--red); color: var(--red); }
+.pt-vote-btn.voted  { border-color: var(--red); color: var(--red); background: rgba(232,0,45,.08); }
+
+.pt-reply-count {
+  font-family: var(--font-ui);
+  font-size: 0.73rem;
+  color: var(--gray-mid);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.pt-toggle-replies {
+  margin-left: auto;
+  font-family: var(--font-ui);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--gray-mid);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px 0;
+  transition: color var(--transition);
+  text-transform: uppercase;
+}
+.pt-toggle-replies:hover { color: var(--white); }
+
+/* REPLIES */
+.pt-replies {
+  display: none;
+  border-top: 1px solid var(--border);
+}
+.pt-replies.open { display: block; }
+
+.pt-reply {
+  display: flex;
+  gap: 12px;
+  padding: 13px 20px;
+  border-bottom: 1px solid var(--border);
+  transition: background var(--transition);
+}
+.pt-reply:hover { background: rgba(255,255,255,0.02); }
+.pt-reply:last-of-type { border-bottom: none; }
+
+.pt-reply-avatar {
+  width: 30px; height: 30px;
+  border-radius: 2px;
+  background: var(--border-mid);
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--gray);
+  flex-shrink: 0;
+}
+
+.pt-reply-body { flex: 1; }
+
+.pt-reply-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+  flex-wrap: wrap;
+}
+
+.pt-reply-author {
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--white);
+}
+
+.pt-reply-text {
+  font-size: 0.83rem;
+  color: var(--gray);
+  line-height: 1.65;
+}
+
+.pt-reply-votes {
+  font-family: var(--font-ui);
+  font-size: 0.7rem;
+  color: var(--gray-mid);
+  flex-shrink: 0;
+  padding-top: 3px;
+}
+
+/* REPLY INPUT */
+.pt-reply-input {
+  display: flex;
+  gap: 8px;
+  padding: 12px 20px;
+  background: rgba(0,0,0,0.12);
+  border-top: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+/* SIDEBAR */
+.pt-sidebar { display: flex; flex-direction: column; gap: 20px; }
+
+.pt-side-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.pt-side-head {
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--border);
+  font-family: var(--font-ui);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.25em;
+  color: var(--gray);
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.pt-side-head::before {
+  content: '';
+  width: 3px; height: 12px;
+  background: var(--red);
+  border-radius: 2px;
+  display: block;
+}
+
+.pt-rule {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 18px;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.82rem;
+  color: var(--gray);
+  line-height: 1.5;
+}
+.pt-rule:last-child { border-bottom: none; }
+.pt-rule-num {
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--red);
+  flex-shrink: 0;
+  min-width: 20px;
+}
+
+.pt-hot-topic {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 18px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background var(--transition);
+}
+.pt-hot-topic:hover { background: rgba(255,255,255,0.025); }
+.pt-hot-topic:last-child { border-bottom: none; }
+.pt-hot-num {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--border-mid);
+  min-width: 24px;
+  line-height: 1.2;
+}
+.pt-hot-title {
+  font-family: var(--font-ui);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--white);
+  line-height: 1.35;
+}
+.pt-hot-votes {
+  font-size: 0.66rem;
+  color: var(--gray-mid);
+  margin-top: 3px;
+}
+
+/* FILTER BAR */
+.pt-filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.pt-filter-btn {
+  font-family: var(--font-ui);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 7px 16px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--gray);
+  cursor: pointer;
+  border-radius: var(--radius);
+  transition: all var(--transition);
+}
+.pt-filter-btn:hover  { color: var(--white); border-color: var(--border-lit); }
+.pt-filter-btn.active { background: var(--red); color: white; border-color: var(--red); }
+
+/* STATS PILL */
+.pt-stat-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 18px;
+  border-bottom: 1px solid var(--border);
+}
+.pt-stat-row:last-child { border-bottom: none; }
+.pt-stat-label { font-family: var(--font-ui); font-size: 0.75rem; color: var(--gray); }
+.pt-stat-val   { font-family: var(--font-display); font-size: 0.85rem; font-weight: 700; color: var(--white); }
+
+/* SEND FEEDBACK */
+.pt-send-status {
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  padding: 6px 12px;
+  border-radius: var(--radius);
+  display: none;
+}
+.pt-send-status.ok  { color: #00c850; background: rgba(0,200,80,.08); border: 1px solid rgba(0,200,80,.3); display: inline-flex; }
+.pt-send-status.err { color: var(--red); background: rgba(232,0,45,.08); border: 1px solid rgba(232,0,45,.3); display: inline-flex; }
+
+@media (max-width: 900px) {
+  .pt-layout { grid-template-columns: 1fr; }
+  .pt-sidebar { display: grid; grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 560px) {
+  .pt-sidebar { grid-template-columns: 1fr; }
+  .pt-reply-input { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+
+<header class="gp-header">
+  <div class="gp-container gp-header-inner">
+    <a href="index.html" class="gp-logo">
+      <div class="gp-logo-mark"><svg viewBox="0 0 24 24" fill="white"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+      <span class="gp-logo-text">Grid<span>Pulse</span></span>
+    </a>
+    <nav class="gp-nav">
+      <a href="index.html"      class="gp-nav-link">Home</a>
+      <a href="noticias.html"   class="gp-nav-link">Noticias</a>
+      <a href="calendario.html" class="gp-nav-link">Calendario</a>
+      <a href="standings.html"  class="gp-nav-link">Standings</a>
+      <a href="equipos.html"    class="gp-nav-link">Equipos</a>
+      <a href="pittalk.html"    class="gp-nav-link active">Pit Talk</a>
+    </nav>
+    <div class="gp-clock-wrap">
+      <div class="gp-live-pill"><div class="gp-live-dot"></div>LIVE</div>
+      <div>
+        <div class="gp-clock" id="gp-clock">--:--:--</div>
+        <div class="gp-clock-date" id="gp-clock-date">---</div>
+      </div>
+    </div>
+    <button class="gp-hamburger" id="gp-hamburger" onclick="gpToggleMenu()"><span></span><span></span><span></span></button>
+  </div>
+</header>
+
+<nav class="gp-mobile-nav" id="gp-mobile-nav">
+  <a href="index.html">🏠 Home</a>
+  <a href="noticias.html">📰 Noticias</a>
+  <a href="calendario.html">📅 Calendario</a>
+  <a href="standings.html">🏆 Standings</a>
+  <a href="equipos.html">🏎️ Equipos</a>
+  <a href="pittalk.html" class="active">💬 Pit Talk</a>
+</nav>
+
+<main class="gp-page">
+<div class="gp-container">
+
+  <div class="gp-section-header gp-anim-fadeUp">
+    <div>
+      <div class="gp-section-eyebrow">Comunidad GridPulse</div>
+      <div class="gp-section-title">Pit Talk 🎙️</div>
+    </div>
+    <span style="font-family:var(--font-ui);font-size:.68rem;color:var(--gray-mid);letter-spacing:.1em;" id="topic-count"></span>
+  </div>
+
+  <div class="pt-layout">
+
+    <!-- MAIN FEED -->
+    <div>
+
+      <!-- NEW POST -->
+      <div class="pt-new-post gp-anim-fadeUp">
+        <div class="pt-form-title">Nueva Publicación</div>
+        <div class="pt-form-row">
+          <input class="gp-input" id="pt-author" placeholder="Tu nombre o alias…" style="flex:1; min-width:150px;">
+          <select class="pt-tag-select" id="pt-tag">
+            <option value="Debate">💬 Debate</option>
+            <option value="Opinion">💡 Opinión</option>
+            <option value="Tecnica">🔧 Técnica</option>
+            <option value="Humor">😂 Humor</option>
+            <option value="Noticia">📰 Noticia</option>
+          </select>
+        </div>
+        <div class="pt-form-row-full">
+          <input class="gp-input" id="pt-title" placeholder="Título de tu publicación…" style="width:100%;">
+        </div>
+        <div class="pt-form-row-full">
+          <textarea class="gp-textarea" id="pt-body" rows="3" placeholder="¿Qué opinas? Comparte tu análisis, predicción o meme…"></textarea>
+        </div>
+        <div class="pt-form-actions">
+          <button class="gp-btn gp-btn-primary" onclick="postTopic()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            Publicar
+          </button>
+          <span class="pt-send-status" id="pt-send-status"></span>
+        </div>
+      </div>
+
+      <!-- FILTER BAR -->
+      <div class="pt-filter-bar gp-anim-fadeUp">
+        <button class="pt-filter-btn active" onclick="filterTopics('all',this)">Todos</button>
+        <button class="pt-filter-btn" onclick="filterTopics('Debate',this)">Debate</button>
+        <button class="pt-filter-btn" onclick="filterTopics('Opinion',this)">Opinión</button>
+        <button class="pt-filter-btn" onclick="filterTopics('Tecnica',this)">Técnica</button>
+        <button class="pt-filter-btn" onclick="filterTopics('Humor',this)">Humor</button>
+        <button class="pt-filter-btn" onclick="filterTopics('Noticia',this)">Noticia</button>
+      </div>
+
+      <!-- TOPICS LIST -->
+      <div id="topics-list"></div>
+
+    </div>
+
+    <!-- SIDEBAR -->
+    <div class="pt-sidebar gp-anim-fadeUp gp-stagger-2">
+
+      <!-- STATS -->
+      <div class="pt-side-card">
+        <div class="pt-side-head">Stats del Foro</div>
+        <div class="pt-stat-row">
+          <span class="pt-stat-label">Publicaciones</span>
+          <span class="pt-stat-val" id="stat-posts">—</span>
+        </div>
+        <div class="pt-stat-row">
+          <span class="pt-stat-label">Respuestas</span>
+          <span class="pt-stat-val" id="stat-replies">—</span>
+        </div>
+        <div class="pt-stat-row">
+          <span class="pt-stat-label">Votos totales</span>
+          <span class="pt-stat-val" id="stat-votes">—</span>
+        </div>
+      </div>
+
+      <!-- HOT TOPICS -->
+      <div class="pt-side-card">
+        <div class="pt-side-head">🔥 Más Votados</div>
+        <div id="hot-topics"></div>
+      </div>
+
+      <!-- RULES -->
+      <div class="pt-side-card">
+        <div class="pt-side-head">📋 Reglas del Pit</div>
+        <div class="pt-rule"><div class="pt-rule-num">1</div><div>Respeta a todos los miembros, sin importar su equipo favorito.</div></div>
+        <div class="pt-rule"><div class="pt-rule-num">2</div><div>Sin spoilers de la carrera sin etiquetarlos correctamente.</div></div>
+        <div class="pt-rule"><div class="pt-rule-num">3</div><div>Fuentes si afirmas algo técnico o estadístico.</div></div>
+        <div class="pt-rule"><div class="pt-rule-num">4</div><div>El humor está permitido, el odio no.</div></div>
+        <div class="pt-rule"><div class="pt-rule-num">5</div><div>¡Disfruta la F1 y comparte la pasión!</div></div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+</main>
+
+<footer class="gp-footer">
+  <div class="gp-container">
+    <div class="gp-footer-inner">
+      <div class="gp-footer-brand">
+        <div class="gp-footer-brand-name">Grid<span>Pulse</span></div>
+        <p class="gp-footer-desc">La comunidad F1 más apasionada. Debate, analiza y comparte con otros fans.</p>
+      </div>
+      <div class="gp-footer-col">
+        <h4>Secciones</h4>
+        <ul class="gp-footer-links">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="noticias.html">Noticias</a></li>
+          <li><a href="standings.html">Standings</a></li>
+          <li><a href="equipos.html">Equipos</a></li>
+        </ul>
+      </div>
+      <div class="gp-footer-col">
+        <h4>Pit Talk</h4>
+        <ul class="gp-footer-links">
+          <li><a href="#" onclick="filterTopics('Debate', document.querySelector('.pt-filter-btn'))">Debates</a></li>
+          <li><a href="#" onclick="filterTopics('Tecnica', document.querySelector('.pt-filter-btn'))">Técnica</a></li>
+          <li><a href="#" onclick="filterTopics('Humor', document.querySelector('.pt-filter-btn'))">Humor</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="gp-footer-bottom">
+      <span class="gp-footer-copy">© 2025 GridPulse — Para fans, por fans.</span>
+      <span class="gp-footer-tag">FORMULA 1 FAN PAGE</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+// ═══════════════════════════════════════════════
+//  FORMSPREE CONFIG
+//  → Envía emails a ortizaliceamaya@gmail.com
+//  INSTRUCCIONES:
+//  1. Ve a https://formspree.io/f/new
+//  2. Escribe ortizaliceamaya@gmail.com como email
+//  3. Copia el endpoint (ej: https://formspree.io/f/xyzabc12)
+//  4. Reemplaza FORMSPREE_ENDPOINT abajo con tu endpoint real
+// ═══════════════════════════════════════════════
+const FORMSPREE_ENDPOINT = 'https://formspree.io/f/YOUR_FORM_ID';
+// ↑↑↑ CAMBIA "YOUR_FORM_ID" por tu ID real de Formspree
+
+// ═══════════════════════════════════════════════
+//  STORAGE
+// ═══════════════════════════════════════════════
+const STORAGE_KEY = 'gridpulse_pittalk_v2';
+
+function loadTopics() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : getDefaultTopics();
+  } catch { return getDefaultTopics(); }
+}
+
+function saveTopics(topics) {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(topics)); } catch {}
+}
+
+function getDefaultTopics() {
+  return [
+    {
+      id: 'seed1',
+      author: 'MaxFan33',
+      tag: 'Debate',
+      time: 'Hace 3 h',
+      ts: Date.now() - 10800000,
+      title: '¿Puede alguien detener a Verstappen en 2025?',
+      body: 'Después de ver las últimas carreras, parece que Max está en otro nivel incluso con un coche que no es el más rápido. McLaren tiene el mejor paquete pero no logran convertirlo en victorias consistentes. ¿Qué necesita Norris para ganar el campeonato?',
+      votes: 47,
+      voted: false,
+      replies: [
+        { id: 'r1', author: 'NorrisFan99', time: 'Hace 2 h', ts: Date.now()-7200000, body: 'Lando lo conseguirá. Solo necesita no tener mala suerte. El MCL39 es claramente superior al RB21 en clasificación.', votes: 22, voted: false },
+        { id: 'r2', author: 'TifossiRojo', time: 'Hace 1 h', ts: Date.now()-3600000, body: 'Ferrari va a despertar en la segunda mitad. Hamilton + Leclerc es una combinación brutal que nadie ha visto antes.', votes: 15, voted: false },
+      ],
+    },
+    {
+      id: 'seed2',
+      author: 'GridMaster',
+      tag: 'Opinion',
+      time: 'Hace 6 h',
+      ts: Date.now() - 21600000,
+      title: 'Mónaco sigue siendo la carrera más sobrevalorada del calendario',
+      body: 'Ver 78 vueltas en fila sin un solo adelantamiento no es Fórmula 1, es un desfile. ¿No deberían quitarlo del calendario o al menos modificar el reglamento para permitir más acción? El glamour no compensa la falta de racing.',
+      votes: 31,
+      voted: false,
+      replies: [
+        { id: 'r3', author: 'ClassicF1', time: 'Hace 5 h', ts: Date.now()-18000000, body: 'Mónaco ES la F1. Sin Mónaco, perdemos la identidad del campeonato. No todo tiene que ser DRS y neumáticos de degradación alta.', votes: 34, voted: false },
+      ],
+    },
+    {
+      id: 'seed3',
+      author: 'TechTalk_F1',
+      tag: 'Tecnica',
+      time: 'Hace 1 día',
+      ts: Date.now() - 86400000,
+      title: 'El fondo plano del MCL39 es revolucionario — análisis técnico',
+      body: 'He estado revisando los datos técnicos filtrados sobre el fondo plano del McLaren. La forma en que canalizan el flujo de aire bajo el difusor es completamente diferente a lo que hace Red Bull. Creo que ahí está la clave de su ventaja en curvas de alta velocidad.',
+      votes: 58,
+      voted: false,
+      replies: [],
+    },
+    {
+      id: 'seed4',
+      author: 'LewisLegend44',
+      tag: 'Debate',
+      time: 'Hace 2 días',
+      ts: Date.now() - 172800000,
+      title: 'Hamilton en Ferrari: ¿decisión correcta o error histórico?',
+      body: 'Con el dicho de hindsight, ¿creen que Lewis tomó la decisión correcta al dejar Mercedes? En sus primeras carreras no ha sido el Lewis dominante que conocemos. ¿Es el coche, la adaptación, o simplemente la edad?',
+      votes: 89,
+      voted: false,
+      replies: [
+        { id: 'r4', author: 'SilverArrowFan', time: 'Hace 1 día', ts: Date.now()-86400000, body: 'Claramente fue un error. Mercedes con Russell está mejorando y Lewis estaría peleando arriba. Ferrari necesita tiempo.', votes: 28, voted: false },
+        { id: 'r5', author: 'ScuderiaForever', time: 'Hace 22 h', ts: Date.now()-79200000, body: 'Dale tiempo. Schumacher tardó 2 años en adaptarse cuando volvió. Lewis sabe lo que hace, su experiencia es incalculable para Ferrari.', votes: 41, voted: false },
+      ],
+    },
+  ];
+}
+
+// ═══════════════════════════════════════════════
+//  AVATAR COLOR
+// ═══════════════════════════════════════════════
+const AVATAR_COLORS = [
+  '#E8002D','#FF8000','#3671C6','#DC0000','#00D2BE',
+  '#006F62','#0090FF','#37BEDD','#9333EA','#F59E0B',
+];
+function avatarColor(name) {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+}
+
+// ═══════════════════════════════════════════════
+//  TAG CLASS
+// ═══════════════════════════════════════════════
+const TAG_MAP = {
+  'Debate':'debate','Opinion':'opinion','Tecnica':'tecnica',
+  'Humor':'humor','Noticia':'noticia',
+};
+function tagClass(tag) { return TAG_MAP[tag] || 'debate'; }
+function tagEmoji(tag) {
+  const m = {'Debate':'💬','Opinion':'💡','Tecnica':'🔧','Humor':'😂','Noticia':'📰'};
+  return m[tag] || '💬';
+}
+
+// ═══════════════════════════════════════════════
+//  SEND EMAIL VIA FORMSPREE
+// ═══════════════════════════════════════════════
+async function sendEmail(type, author, title, body, replyTo) {
+  if (FORMSPREE_ENDPOINT.includes('YOUR_FORM_ID')) return; // not configured, skip silently
+
+  const subject = type === 'topic'
+    ? `[GridPulse PitTalk] Nueva publicación: "${title}"`
+    : `[GridPulse PitTalk] Nueva respuesta en: "${replyTo}"`;
+
+  const message = type === 'topic'
+    ? `Nueva publicación en Pit Talk\n\nAutor: ${author}\nTítulo: ${title}\n\n${body}`
+    : `Nueva respuesta en Pit Talk\n\nAutor: ${author}\nEn el hilo: "${replyTo}"\n\n${body}`;
+
+  try {
+    await fetch(FORMSPREE_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({
+        _subject: subject,
+        name:     author,
+        message:  message,
+        _replyto: 'noreply@gridpulse.app',
+      }),
+    });
+  } catch (e) {
+    console.warn('Formspree send failed:', e);
+  }
+}
+
+// ═══════════════════════════════════════════════
+//  RENDER
+// ═══════════════════════════════════════════════
+let topics = [];
+let currentFilter = 'all';
+
+function renderAll() {
+  renderTopics();
+  renderHotTopics();
+  updateStats();
+}
+
+function renderTopics() {
+  const el = document.getElementById('topics-list');
+  const filtered = currentFilter === 'all'
+    ? topics
+    : topics.filter(t => t.tag === currentFilter);
+
+  document.getElementById('topic-count').textContent =
+    `${filtered.length} publicación${filtered.length !== 1 ? 'es' : ''}`;
+
+  if (!filtered.length) {
+    el.innerHTML = `
+      <div style="padding:48px;text-align:center;color:var(--gray-mid);font-family:var(--font-ui);font-size:.85rem;letter-spacing:.1em;">
+        No hay publicaciones en esta categoría aún. ¡Sé el primero!
+      </div>`;
+    return;
+  }
+
+  el.innerHTML = filtered.map(t => buildTopicHTML(t)).join('');
+}
+
+function buildTopicHTML(t) {
+  const color   = avatarColor(t.author);
+  const initial = t.author[0].toUpperCase();
+  const tc      = tagClass(t.tag);
+  const te      = tagEmoji(t.tag);
+
+  const repliesHTML = t.replies.map(r => buildReplyHTML(r)).join('');
+
+  return `
+  <div class="pt-topic" id="topic-${t.id}" data-tag="${t.tag}">
+
+    <div class="pt-topic-head">
+      <div class="pt-author-row">
+        <div class="pt-avatar" style="background:${color};">${initial}</div>
+        <div>
+          <div class="pt-author-name">${t.author}</div>
+          <span class="pt-time">${t.time}</span>
+        </div>
+        <span class="pt-tag pt-tag-${tc}">${te} ${t.tag}</span>
+      </div>
+      <div class="pt-topic-title">${t.title}</div>
+      <div class="pt-topic-body">${t.body}</div>
+    </div>
+
+    <div class="pt-actions">
+      <button class="pt-vote-btn ${t.voted ? 'voted' : ''}" onclick="voteTopic('${t.id}', this)">
+        ▲ <span class="vote-count">${t.votes}</span>
+      </button>
+      <span class="pt-reply-count">💬 ${t.replies.length} respuesta${t.replies.length !== 1 ? 's' : ''}</span>
+      <button class="pt-toggle-replies" onclick="toggleReplies('${t.id}', this)">
+        ${t.replies.length ? '▼ Ver respuestas' : '+ Responder'}
+      </button>
+    </div>
+
+    <div class="pt-replies ${t.replies.length ? '' : 'open'}" id="replies-${t.id}">
+      <div id="replies-inner-${t.id}">${repliesHTML}</div>
+      <div class="pt-reply-input">
+        <input class="gp-input" id="reply-author-${t.id}" placeholder="Tu nombre…"
+               style="width:130px; flex-shrink:0;">
+        <input class="gp-input" id="reply-body-${t.id}" placeholder="Escribe tu respuesta…"
+               style="flex:1; min-width:180px;">
+        <button class="gp-btn gp-btn-ghost gp-btn-sm" onclick="postReply('${t.id}', '${t.title.replace(/'/g,"\\'")}')">
+          Enviar
+        </button>
+      </div>
+    </div>
+
+  </div>`;
+}
+
+function buildReplyHTML(r) {
+  const color   = avatarColor(r.author);
+  const initial = r.author[0].toUpperCase();
+  return `
+  <div class="pt-reply" id="reply-${r.id}">
+    <div class="pt-reply-avatar" style="background:${color}; color:white;">${initial}</div>
+    <div class="pt-reply-body">
+      <div class="pt-reply-meta">
+        <span class="pt-reply-author">${r.author}</span>
+        <span class="pt-time">${r.time}</span>
+      </div>
+      <div class="pt-reply-text">${r.body}</div>
+    </div>
+    <div class="pt-reply-votes">▲ ${r.votes}</div>
+  </div>`;
+}
+
+function renderHotTopics() {
+  const sorted = [...topics].sort((a, b) => b.votes - a.votes).slice(0, 5);
+  document.getElementById('hot-topics').innerHTML = sorted.map((t, i) => `
+    <div class="pt-hot-topic" onclick="scrollToTopic('${t.id}')">
+      <div class="pt-hot-num">${i + 1}</div>
+      <div>
+        <div class="pt-hot-title">${t.title}</div>
+        <div class="pt-hot-votes">▲ ${t.votes} votos · ${t.replies.length} replies</div>
+      </div>
+    </div>`).join('');
+}
+
+function updateStats() {
+  const totalReplies = topics.reduce((s, t) => s + t.replies.length, 0);
+  const totalVotes   = topics.reduce((s, t) =>
+    s + t.votes + t.replies.reduce((rs, r) => rs + r.votes, 0), 0);
+  document.getElementById('stat-posts').textContent   = topics.length;
+  document.getElementById('stat-replies').textContent = totalReplies;
+  document.getElementById('stat-votes').textContent   = totalVotes;
+}
+
+// ═══════════════════════════════════════════════
+//  ACTIONS
+// ═══════════════════════════════════════════════
+function toggleReplies(topicId, btn) {
+  const el = document.getElementById(`replies-${topicId}`);
+  const isOpen = el.classList.contains('open');
+  el.classList.toggle('open');
+  const topic = topics.find(t => t.id === topicId);
+  btn.textContent = isOpen
+    ? (topic?.replies.length ? '▼ Ver respuestas' : '+ Responder')
+    : '▲ Cerrar';
+}
+
+function scrollToTopic(id) {
+  const el = document.getElementById(`topic-${id}`);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+async function postTopic() {
+  const author = (document.getElementById('pt-author').value.trim() || 'Anónimo');
+  const tag    = document.getElementById('pt-tag').value;
+  const title  = document.getElementById('pt-title').value.trim();
+  const body   = document.getElementById('pt-body').value.trim();
+  const status = document.getElementById('pt-send-status');
+
+  if (!title || !body) {
+    status.textContent = '⚠ Completa el título y el texto.';
+    status.className   = 'pt-send-status err';
+    setTimeout(() => status.className = 'pt-send-status', 3000);
+    return;
+  }
+
+  const newTopic = {
+    id:      'tp_' + Date.now(),
+    author, tag, title, body,
+    time:    'Ahora mismo',
+    ts:      Date.now(),
+    votes:   0,
+    voted:   false,
+    replies: [],
+  };
+
+  topics.unshift(newTopic);
+  saveTopics(topics);
+  renderAll();
+
+  // Clear form
+  document.getElementById('pt-title').value = '';
+  document.getElementById('pt-body').value  = '';
+
+  // Email notification
+  status.textContent = '⏳ Enviando…';
+  status.className   = 'pt-send-status ok';
+  await sendEmail('topic', author, title, body, '');
+  status.textContent = '✅ Publicado y notificado';
+  setTimeout(() => { status.className = 'pt-send-status'; }, 4000);
+}
+
+async function postReply(topicId, topicTitle) {
+  const authorEl = document.getElementById(`reply-author-${topicId}`);
+  const bodyEl   = document.getElementById(`reply-body-${topicId}`);
+  const author   = (authorEl?.value.trim() || 'Anónimo');
+  const body     = bodyEl?.value.trim();
+
+  if (!body) return;
+
+  const topic = topics.find(t => t.id === topicId);
+  if (!topic) return;
+
+  const newReply = {
+    id:     'rp_' + Date.now(),
+    author, body,
+    time:   'Ahora mismo',
+    ts:     Date.now(),
+    votes:  0,
+    voted:  false,
+  };
+
+  topic.replies.push(newReply);
+  saveTopics(topics);
+
+  // Update DOM directly (no full re-render to keep state)
+  const inner = document.getElementById(`replies-inner-${topicId}`);
+  if (inner) inner.insertAdjacentHTML('beforeend', buildReplyHTML(newReply));
+
+  // Update reply count
+  const actions = document.querySelector(`#topic-${topicId} .pt-reply-count`);
+  if (actions) actions.textContent = `💬 ${topic.replies.length} respuesta${topic.replies.length !== 1 ? 's' : ''}`;
+
+  authorEl.value = '';
+  bodyEl.value   = '';
+
+  renderHotTopics();
+  updateStats();
+
+  // Email notification
+  await sendEmail('reply', author, newReply.body, topicTitle, topicTitle);
+}
+
+function voteTopic(topicId, btn) {
+  const topic = topics.find(t => t.id === topicId);
+  if (!topic) return;
+  topic.voted = !topic.voted;
+  topic.votes += topic.voted ? 1 : -1;
+  saveTopics(topics);
+  btn.classList.toggle('voted', topic.voted);
+  btn.querySelector('.vote-count').textContent = topic.votes;
+  renderHotTopics();
+  updateStats();
+}
+
+function filterTopics(filter, btn) {
+  currentFilter = filter;
+  document.querySelectorAll('.pt-filter-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderTopics();
+}
+
+// ═══════════════════════════════════════════════
+//  CLOCK
+// ═══════════════════════════════════════════════
+(function clock(){
+  const pad = n => String(n).padStart(2,'0');
+  setInterval(()=>{
+    const n = new Date();
+    const c = document.getElementById('gp-clock');
+    const d = document.getElementById('gp-clock-date');
+    if(c) c.textContent=`${pad(n.getHours())}:${pad(n.getMinutes())}:${pad(n.getSeconds())}`;
+    if(d){
+      const ms=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+      const wd=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+      d.textContent=`${wd[n.getDay()]} ${n.getDate()} ${ms[n.getMonth()]}`;
+    }
+  },1000);
+})();
+
+function gpToggleMenu() {
+  document.getElementById('gp-mobile-nav').classList.toggle('open');
+  document.getElementById('gp-hamburger').classList.toggle('open');
+}
+
+// ── INIT ──
+topics = loadTopics();
+renderAll();
+</script>
+</body>
+</html>

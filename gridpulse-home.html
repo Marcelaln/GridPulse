@@ -1,0 +1,2009 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GridPulse — F1 para Fans</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --red: #E8002D;
+    --red-dark: #b0001f;
+    --black: #0c0c0c;
+    --dark: #111111;
+    --panel: #181818;
+    --border: #262626;
+    --border-light: #333;
+    --white: #f8f8f8;
+    --gray: #aaaaaa;
+    --gray-mid: #666;
+    --accent: #ffffff;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ─── SCROLLBAR ─── */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--black); }
+  ::-webkit-scrollbar-thumb { background: var(--red); border-radius: 2px; }
+
+  /* ─── HEADER / NAV ─── */
+  header {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 1000;
+    background: rgba(12,12,12,0.95);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .header-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 24px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    flex-shrink: 0;
+  }
+
+  .logo-icon {
+    width: 36px;
+    height: 36px;
+    background: var(--red);
+    clip-path: polygon(15% 0%, 100% 0%, 85% 100%, 0% 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .logo-icon svg { width: 18px; height: 18px; fill: white; }
+
+  .logo-text {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900;
+    font-size: 1.3rem;
+    letter-spacing: 0.08em;
+    color: var(--white);
+  }
+
+  .logo-text span { color: var(--red); }
+
+  /* LIVE CLOCK in header */
+  .header-clock {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .live-indicator {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    color: var(--red);
+    text-transform: uppercase;
+  }
+
+  .live-dot {
+    width: 6px; height: 6px;
+    background: var(--red);
+    border-radius: 50%;
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.7); }
+  }
+
+  .clock {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--white);
+    letter-spacing: 0.1em;
+    min-width: 80px;
+  }
+
+  .clock-date {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.7rem;
+    color: var(--gray);
+    letter-spacing: 0.1em;
+    text-align: right;
+  }
+
+  /* NAV LINKS */
+  nav.main-nav {
+    display: flex;
+    gap: 4px;
+  }
+
+  nav.main-nav a {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gray);
+    text-decoration: none;
+    padding: 6px 14px;
+    border-radius: 2px;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  nav.main-nav a:hover { color: var(--white); background: rgba(255,255,255,0.05); }
+  nav.main-nav a.active { color: var(--white); background: var(--red); }
+
+  .hamburger {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    cursor: pointer;
+    padding: 4px;
+    background: none;
+    border: none;
+  }
+
+  .hamburger span {
+    display: block;
+    width: 22px; height: 2px;
+    background: var(--white);
+    transition: all 0.3s;
+  }
+
+  /* MOBILE NAV */
+  .mobile-nav {
+    display: none;
+    position: fixed;
+    top: 64px; left: 0; right: 0;
+    background: rgba(12,12,12,0.98);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    z-index: 999;
+    padding: 16px 24px;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .mobile-nav.open { display: flex; }
+
+  .mobile-nav a {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gray);
+    text-decoration: none;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+    transition: color 0.2s;
+  }
+
+  .mobile-nav a:hover, .mobile-nav a.active { color: var(--red); }
+
+  /* ─── MAIN LAYOUT ─── */
+  main {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 80px 24px 60px;
+  }
+
+  /* ─── PAGE SECTIONS ─── */
+  .page-section { display: none; }
+  .page-section.active { display: block; }
+
+  /* ─── HERO (HOME) ─── */
+  .hero {
+    position: relative;
+    margin-top: 20px;
+    margin-bottom: 60px;
+    overflow: hidden;
+    min-height: 380px;
+    display: flex;
+    align-items: center;
+  }
+
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 70% 80% at 100% 50%, rgba(232,0,45,0.08) 0%, transparent 70%),
+      repeating-linear-gradient(90deg, transparent, transparent 79px, rgba(255,255,255,0.02) 80px),
+      repeating-linear-gradient(0deg, transparent, transparent 79px, rgba(255,255,255,0.02) 80px);
+  }
+
+  .hero-stripe {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 4px;
+    background: var(--red);
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 2;
+    padding: 40px 0 40px 40px;
+    max-width: 640px;
+  }
+
+  .hero-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.3em;
+    color: var(--red);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  .hero-tag::before {
+    content: '';
+    display: block;
+    width: 20px; height: 1px;
+    background: var(--red);
+  }
+
+  .hero-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(2.2rem, 5vw, 4rem);
+    font-weight: 900;
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    color: var(--white);
+    margin-bottom: 20px;
+  }
+
+  .hero-title .highlight {
+    color: var(--red);
+    display: block;
+  }
+
+  .hero-desc {
+    font-size: 1rem;
+    font-weight: 300;
+    color: var(--gray);
+    line-height: 1.7;
+    max-width: 480px;
+    margin-bottom: 32px;
+  }
+
+  .hero-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--red);
+    color: white;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 14px 28px;
+    text-decoration: none;
+    clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 100%, 10px 100%);
+    transition: background 0.2s;
+    cursor: pointer;
+    border: none;
+  }
+
+  .hero-cta:hover { background: var(--red-dark); }
+
+  .hero-cta svg { width: 14px; height: 14px; fill: white; }
+
+  .hero-right {
+    position: absolute;
+    right: -20px;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0.07;
+    pointer-events: none;
+  }
+
+  .hero-right-text {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(80px, 14vw, 180px);
+    font-weight: 900;
+    color: var(--white);
+    line-height: 1;
+    letter-spacing: -0.05em;
+    white-space: nowrap;
+  }
+
+  /* ─── STATS BAR ─── */
+  .stats-bar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-bottom: 48px;
+  }
+
+  .stat-item {
+    background: var(--panel);
+    padding: 20px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    transition: background 0.2s;
+  }
+
+  .stat-item:hover { background: #1e1e1e; }
+
+  .stat-num {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--white);
+    line-height: 1;
+  }
+
+  .stat-num span { color: var(--red); }
+
+  .stat-label {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    color: var(--gray-mid);
+    text-transform: uppercase;
+  }
+
+  /* ─── SECTION TITLES ─── */
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+  }
+
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.3em;
+    color: var(--gray);
+    text-transform: uppercase;
+  }
+
+  .section-title::before {
+    content: '';
+    display: block;
+    width: 3px; height: 16px;
+    background: var(--red);
+  }
+
+  .section-title-big {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--white);
+    display: block;
+    margin-top: 4px;
+  }
+
+  .see-all {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    color: var(--red);
+    text-decoration: none;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: gap 0.2s;
+  }
+
+  .see-all:hover { gap: 10px; }
+
+  /* ─── HOME GRID ─── */
+  .home-grid {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 32px;
+  }
+
+  /* ─── NEWS CARDS ─── */
+  .news-featured {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color 0.2s;
+    margin-bottom: 24px;
+  }
+
+  .news-featured:hover { border-color: var(--red); }
+
+  .news-featured-img {
+    width: 100%;
+    height: 240px;
+    background: linear-gradient(135deg, #1a1a1a 0%, #222 50%, #1a1a1a 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .news-featured-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.8;
+  }
+
+  .news-featured-img .placeholder-icon {
+    font-size: 48px;
+    opacity: 0.15;
+  }
+
+  .news-cat {
+    position: absolute;
+    top: 16px; left: 16px;
+    background: var(--red);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    color: white;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 100%, 6px 100%);
+  }
+
+  .news-featured-body { padding: 20px; }
+
+  .news-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+
+  .news-source {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    color: var(--gray-mid);
+    text-transform: uppercase;
+  }
+
+  .news-time {
+    font-size: 0.7rem;
+    color: var(--gray-mid);
+  }
+
+  .news-featured-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--white);
+    line-height: 1.35;
+    margin-bottom: 8px;
+  }
+
+  .news-featured-desc {
+    font-size: 0.85rem;
+    color: var(--gray);
+    line-height: 1.6;
+  }
+
+  .news-list { display: flex; flex-direction: column; gap: 1px; }
+
+  .news-item {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 16px;
+    display: flex;
+    gap: 14px;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+  }
+
+  .news-item:hover { border-color: var(--red); background: #1a1a1a; }
+
+  .news-item-num {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: var(--border);
+    min-width: 32px;
+    line-height: 1;
+    padding-top: 2px;
+  }
+
+  .news-item-body { flex: 1; }
+
+  .news-item-cat {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    color: var(--red);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .news-item-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--white);
+    line-height: 1.3;
+    margin-bottom: 6px;
+  }
+
+  .news-item-time {
+    font-size: 0.7rem;
+    color: var(--gray-mid);
+  }
+
+  /* ─── SIDEBAR ─── */
+  .sidebar { display: flex; flex-direction: column; gap: 24px; }
+
+  /* NEXT RACE CARD */
+  .next-race-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-top: 3px solid var(--red);
+    overflow: hidden;
+  }
+
+  .next-race-header {
+    padding: 16px 20px;
+    background: rgba(232,0,45,0.06);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .next-race-label {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.25em;
+    color: var(--red);
+    text-transform: uppercase;
+  }
+
+  .next-race-round {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.7rem;
+    color: var(--gray-mid);
+  }
+
+  .next-race-body { padding: 20px; }
+
+  .next-race-country {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--white);
+    line-height: 1.1;
+    margin-bottom: 4px;
+  }
+
+  .next-race-circuit {
+    font-size: 0.8rem;
+    color: var(--gray);
+    margin-bottom: 16px;
+  }
+
+  .next-race-date {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .next-race-date-box {
+    background: var(--red);
+    padding: 8px 14px;
+    clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 100%, 8px 100%);
+    text-align: center;
+  }
+
+  .next-race-day {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 900;
+    color: white;
+    line-height: 1;
+  }
+
+  .next-race-month {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    color: rgba(255,255,255,0.8);
+    text-transform: uppercase;
+  }
+
+  .next-race-time-info {
+    font-family: 'Rajdhani', sans-serif;
+    color: var(--gray);
+    font-size: 0.85rem;
+    line-height: 1.5;
+  }
+
+  .next-race-time-info strong {
+    color: var(--white);
+    font-weight: 600;
+    display: block;
+  }
+
+  /* COUNTDOWN */
+  .countdown {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    border-top: 1px solid var(--border);
+    padding-top: 16px;
+  }
+
+  .countdown-block {
+    text-align: center;
+    background: var(--dark);
+    padding: 10px 4px;
+  }
+
+  .countdown-num {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--white);
+    line-height: 1;
+    display: block;
+  }
+
+  .countdown-label {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.55rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    color: var(--gray-mid);
+    text-transform: uppercase;
+    display: block;
+    margin-top: 4px;
+  }
+
+  /* STANDINGS MINI */
+  .standings-mini {
+    background: var(--panel);
+    border: 1px solid var(--border);
+  }
+
+  .standings-mini-header {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .standings-mini-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    color: var(--gray);
+    text-transform: uppercase;
+  }
+
+  .standings-tabs {
+    display: flex;
+    gap: 0;
+  }
+
+  .standings-tab {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--gray-mid);
+    text-transform: uppercase;
+    padding: 4px 10px;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: transparent;
+    transition: all 0.2s;
+    text-decoration: none;
+  }
+
+  .standings-tab.active, .standings-tab:hover {
+    background: var(--red);
+    color: white;
+    border-color: var(--red);
+  }
+
+  .driver-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 20px;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+
+  .driver-row:hover { background: rgba(255,255,255,0.03); }
+
+  .driver-pos {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--gray-mid);
+    min-width: 18px;
+  }
+
+  .driver-pos.top { color: var(--white); }
+
+  .driver-color-bar {
+    width: 3px;
+    height: 28px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  .driver-info { flex: 1; }
+
+  .driver-name {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--white);
+    line-height: 1.2;
+  }
+
+  .driver-team {
+    font-size: 0.65rem;
+    color: var(--gray-mid);
+    letter-spacing: 0.05em;
+  }
+
+  .driver-pts {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--white);
+  }
+
+  /* ─── LOADING SPINNER ─── */
+  .loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    gap: 10px;
+    color: var(--gray);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+
+  .spinner {
+    width: 20px; height: 20px;
+    border: 2px solid var(--border);
+    border-top-color: var(--red);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ─── ERROR STATE ─── */
+  .error-state {
+    padding: 30px 20px;
+    text-align: center;
+    color: var(--gray);
+    font-size: 0.85rem;
+    font-family: 'Rajdhani', sans-serif;
+    letter-spacing: 0.1em;
+  }
+
+  .error-state strong { display: block; color: var(--white); font-size: 1rem; margin-bottom: 6px; }
+
+  /* ─── FOOTER ─── */
+  footer {
+    margin-top: 80px;
+    border-top: 1px solid var(--border);
+    background: var(--dark);
+  }
+
+  .footer-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 40px 24px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 40px;
+  }
+
+  .footer-brand .logo-text {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900;
+    font-size: 1.2rem;
+    letter-spacing: 0.08em;
+    color: var(--white);
+    display: block;
+    margin-bottom: 10px;
+  }
+
+  .footer-brand .logo-text span { color: var(--red); }
+
+  .footer-desc {
+    font-size: 0.85rem;
+    color: var(--gray-mid);
+    line-height: 1.6;
+  }
+
+  .footer-col h4 {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.25em;
+    color: var(--gray);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+
+  .footer-col ul li a {
+    font-size: 0.85rem;
+    color: var(--gray-mid);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .footer-col ul li a:hover { color: var(--white); }
+
+  .footer-bottom {
+    border-top: 1px solid var(--border);
+    padding: 16px 24px;
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .footer-copy {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.7rem;
+    color: var(--gray-mid);
+    letter-spacing: 0.1em;
+  }
+
+  .footer-f1-tag {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.6rem;
+    color: var(--border);
+    letter-spacing: 0.2em;
+  }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 1024px) {
+    .home-grid { grid-template-columns: 1fr; }
+    .sidebar { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .hero-right { display: none; }
+  }
+
+  @media (max-width: 768px) {
+    nav.main-nav { display: none; }
+    .hamburger { display: flex; }
+    .stats-bar { grid-template-columns: repeat(2, 1fr); }
+    .sidebar { grid-template-columns: 1fr; }
+    .footer-inner { grid-template-columns: 1fr; gap: 24px; }
+    .header-clock { display: none; }
+    .hero-content { padding: 30px 0 30px 20px; }
+    .hero { min-height: 280px; }
+    .countdown { grid-template-columns: repeat(4, 1fr); }
+  }
+
+  @media (max-width: 480px) {
+    .header-inner { padding: 0 16px; }
+    main { padding: 76px 16px 40px; }
+    .stats-bar { grid-template-columns: repeat(2, 1fr); }
+    .stat-num { font-size: 1.4rem; }
+  }
+
+  /* ─── ANIMATIONS ─── */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .animate-in {
+    opacity: 0;
+    animation: fadeIn 0.5s ease forwards;
+  }
+
+  .animate-in:nth-child(1) { animation-delay: 0.05s; }
+  .animate-in:nth-child(2) { animation-delay: 0.1s; }
+  .animate-in:nth-child(3) { animation-delay: 0.15s; }
+  .animate-in:nth-child(4) { animation-delay: 0.2s; }
+  .animate-in:nth-child(5) { animation-delay: 0.25s; }
+
+  /* ─── PLACEHOLDER SECTIONS ─── */
+  .coming-soon {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    text-align: center;
+    gap: 16px;
+    border: 1px dashed var(--border);
+    background: var(--panel);
+    padding: 40px;
+  }
+
+  .coming-soon-icon {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 3rem;
+    font-weight: 900;
+    color: var(--border);
+  }
+
+  .coming-soon h2 {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.25em;
+    color: var(--gray);
+    text-transform: uppercase;
+  }
+
+  .coming-soon p {
+    font-size: 0.85rem;
+    color: var(--gray-mid);
+    max-width: 300px;
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="header-inner">
+    <a href="#" class="logo" onclick="showSection('home')">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24"><path d="M3 12l9-9 9 9M5 10v9h5v-6h4v6h5v-9"/></svg>
+      </div>
+      <span class="logo-text">Grid<span>Pulse</span></span>
+    </a>
+
+    <nav class="main-nav">
+      <a href="#" class="active" id="nav-home" onclick="showSection('home'); return false;">Home</a>
+      <a href="#" id="nav-noticias" onclick="showSection('noticias'); return false;">Noticias</a>
+      <a href="#" id="nav-calendario" onclick="showSection('calendario'); return false;">Calendario</a>
+      <a href="#" id="nav-standings" onclick="showSection('standings'); return false;">Standings</a>
+      <a href="#" id="nav-equipos" onclick="showSection('equipos'); return false;">Equipos</a>
+      <a href="#" id="nav-foro" onclick="showSection('foro'); return false;">Pit Talk</a>
+    </nav>
+
+    <div class="header-clock">
+      <div class="live-indicator">
+        <div class="live-dot"></div>
+        LIVE
+      </div>
+      <div>
+        <div class="clock" id="clock">--:--:--</div>
+        <div class="clock-date" id="clock-date">---</div>
+      </div>
+    </div>
+
+    <button class="hamburger" id="hamburger" onclick="toggleMenu()">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<!-- MOBILE NAV -->
+<div class="mobile-nav" id="mobile-nav">
+  <a href="#" class="active" onclick="showSection('home'); toggleMenu(); return false;">🏠 Home</a>
+  <a href="#" onclick="showSection('noticias'); toggleMenu(); return false;">📰 Noticias</a>
+  <a href="#" onclick="showSection('calendario'); toggleMenu(); return false;">📅 Calendario</a>
+  <a href="#" onclick="showSection('standings'); toggleMenu(); return false;">🏆 Standings</a>
+  <a href="#" onclick="showSection('equipos'); toggleMenu(); return false;">🏎️ Equipos</a>
+  <a href="#" onclick="showSection('foro'); toggleMenu(); return false;">💬 Pit Talk</a>
+</div>
+
+<!-- MAIN CONTENT -->
+<main>
+
+  <!-- ══════ HOME ══════ -->
+  <section class="page-section active" id="section-home">
+
+    <!-- HERO -->
+    <div class="hero">
+      <div class="hero-bg"></div>
+      <div class="hero-stripe"></div>
+      <div class="hero-content">
+        <div class="hero-tag">Temporada 2025</div>
+        <h1 class="hero-title">
+          La Velocidad<br>
+          <span class="highlight">es tu Pulso.</span>
+        </h1>
+        <p class="hero-desc">
+          Noticias en tiempo real, calendario de Grandes Premios, standings actualizados y la comunidad F1 más apasionada. Todo en un solo lugar.
+        </p>
+        <button class="hero-cta" onclick="showSection('noticias')">
+          Ver Últimas Noticias
+          <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+      <div class="hero-right">
+        <div class="hero-right-text">F1</div>
+      </div>
+    </div>
+
+    <!-- STATS BAR -->
+    <div class="stats-bar">
+      <div class="stat-item animate-in">
+        <div class="stat-num">2<span>4</span></div>
+        <div class="stat-label">Grandes Premios</div>
+      </div>
+      <div class="stat-item animate-in">
+        <div class="stat-num">2<span>0</span></div>
+        <div class="stat-label">Pilotos</div>
+      </div>
+      <div class="stat-item animate-in">
+        <div class="stat-num">1<span>0</span></div>
+        <div class="stat-label">Equipos</div>
+      </div>
+      <div class="stat-item animate-in">
+        <div class="stat-num" id="races-done">—</div>
+        <div class="stat-label">Carreras Disputadas</div>
+      </div>
+    </div>
+
+    <!-- MAIN + SIDEBAR -->
+    <div class="home-grid">
+
+      <!-- LEFT: NEWS -->
+      <div>
+        <div class="section-header">
+          <div class="section-title">
+            <div>
+              <span>Últimas Noticias</span>
+              <span class="section-title-big">En Pista</span>
+            </div>
+          </div>
+          <a href="#" class="see-all" onclick="showSection('noticias'); return false;">
+            Ver todo →
+          </a>
+        </div>
+
+        <!-- FEATURED NEWS -->
+        <div class="news-featured animate-in" id="news-featured">
+          <div class="loading"><div class="spinner"></div> Cargando noticias…</div>
+        </div>
+
+        <!-- NEWS LIST -->
+        <div class="news-list animate-in" id="news-list"></div>
+      </div>
+
+      <!-- SIDEBAR -->
+      <div class="sidebar">
+
+        <!-- NEXT RACE -->
+        <div class="next-race-card animate-in">
+          <div class="next-race-header">
+            <span class="next-race-label">⚑ Próxima Carrera</span>
+            <span class="next-race-round" id="next-race-round">—</span>
+          </div>
+          <div class="next-race-body">
+            <div class="next-race-country" id="next-race-country">Cargando…</div>
+            <div class="next-race-circuit" id="next-race-circuit">—</div>
+            <div class="next-race-date">
+              <div class="next-race-date-box">
+                <div class="next-race-day" id="next-race-day">—</div>
+                <div class="next-race-month" id="next-race-month">—</div>
+              </div>
+              <div class="next-race-time-info">
+                <strong id="next-race-time">—</strong>
+                <span>Hora Local (UTC-6)</span>
+              </div>
+            </div>
+            <div class="countdown">
+              <div class="countdown-block"><span class="countdown-num" id="cd-days">--</span><span class="countdown-label">Días</span></div>
+              <div class="countdown-block"><span class="countdown-num" id="cd-hours">--</span><span class="countdown-label">Horas</span></div>
+              <div class="countdown-block"><span class="countdown-num" id="cd-mins">--</span><span class="countdown-label">Min</span></div>
+              <div class="countdown-block"><span class="countdown-num" id="cd-secs">--</span><span class="countdown-label">Seg</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MINI STANDINGS -->
+        <div class="standings-mini animate-in">
+          <div class="standings-mini-header">
+            <span class="standings-mini-title">Standings 2025</span>
+            <div class="standings-tabs">
+              <a href="#" class="standings-tab active" id="tab-drivers" onclick="switchStandingsTab('drivers'); return false;">Pilotos</a>
+              <a href="#" class="standings-tab" id="tab-constructors" onclick="switchStandingsTab('constructors'); return false;">Equipos</a>
+            </div>
+          </div>
+          <div id="mini-standings-list">
+            <div class="loading"><div class="spinner"></div></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════ NOTICIAS ══════ -->
+  <section class="page-section" id="section-noticias">
+    <div class="section-header" style="margin-top:20px; margin-bottom:32px;">
+      <div class="section-title">
+        <div>
+          <span>Feed en Tiempo Real</span>
+          <span class="section-title-big">Noticias F1</span>
+        </div>
+      </div>
+    </div>
+    <div id="noticias-grid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px;">
+      <div class="loading" style="grid-column:1/-1;"><div class="spinner"></div> Cargando noticias…</div>
+    </div>
+  </section>
+
+  <!-- ══════ CALENDARIO ══════ -->
+  <section class="page-section" id="section-calendario">
+    <div class="section-header" style="margin-top:20px; margin-bottom:32px;">
+      <div class="section-title">
+        <div>
+          <span>Temporada 2025</span>
+          <span class="section-title-big">Calendario F1</span>
+        </div>
+      </div>
+    </div>
+    <div id="calendario-list"></div>
+  </section>
+
+  <!-- ══════ STANDINGS ══════ -->
+  <section class="page-section" id="section-standings">
+    <div class="section-header" style="margin-top:20px; margin-bottom:32px;">
+      <div class="section-title">
+        <div>
+          <span>Campeonato 2025</span>
+          <span class="section-title-big">Clasificación</span>
+        </div>
+      </div>
+      <div class="standings-tabs">
+        <a href="#" class="standings-tab active" id="full-tab-drivers" onclick="switchFullStandings('drivers'); return false;">Pilotos</a>
+        <a href="#" class="standings-tab" id="full-tab-constructors" onclick="switchFullStandings('constructors'); return false;">Constructores</a>
+      </div>
+    </div>
+    <div id="full-standings-container"></div>
+  </section>
+
+  <!-- ══════ EQUIPOS ══════ -->
+  <section class="page-section" id="section-equipos">
+    <div class="section-header" style="margin-top:20px; margin-bottom:32px;">
+      <div class="section-title">
+        <div>
+          <span>Parrilla 2025</span>
+          <span class="section-title-big">Equipos</span>
+        </div>
+      </div>
+    </div>
+    <div id="equipos-container"></div>
+  </section>
+
+  <!-- ══════ FORO ══════ -->
+  <section class="page-section" id="section-foro">
+    <div class="section-header" style="margin-top:20px; margin-bottom:32px;">
+      <div class="section-title">
+        <div>
+          <span>Comunidad GridPulse</span>
+          <span class="section-title-big">Pit Talk</span>
+        </div>
+      </div>
+    </div>
+    <div id="foro-container"></div>
+  </section>
+
+</main>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <span class="logo-text">Grid<span>Pulse</span></span>
+      <p class="footer-desc">El hub definitivo para fans de la Fórmula 1. Noticias, datos, calendario y comunidad en un solo lugar.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Secciones</h4>
+      <ul>
+        <li><a href="#" onclick="showSection('home'); return false;">Home</a></li>
+        <li><a href="#" onclick="showSection('noticias'); return false;">Noticias</a></li>
+        <li><a href="#" onclick="showSection('calendario'); return false;">Calendario</a></li>
+        <li><a href="#" onclick="showSection('standings'); return false;">Standings</a></li>
+        <li><a href="#" onclick="showSection('foro'); return false;">Pit Talk</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>GridPulse</h4>
+      <ul>
+        <li><a href="#">Acerca de</a></li>
+        <li><a href="#">Contacto</a></li>
+        <li><a href="#">Fuentes de Datos</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span class="footer-copy">© 2025 GridPulse — Para fans, por fans.</span>
+    <span class="footer-f1-tag">FORMULA 1 FAN PAGE</span>
+  </div>
+</footer>
+
+<script>
+// ═══════════════════════════════════
+//  DATA: F1 2025 SEASON
+// ═══════════════════════════════════
+
+const CALENDAR_2025 = [
+  { round: 1,  name: "Gran Premio de Australia",    circuit: "Circuito de Albert Park",             country: "🇦🇺", date: "2025-03-16", raceTime: "15:00", sprint: false, done: true },
+  { round: 2,  name: "Gran Premio de China",         circuit: "Circuito Internacional de Shanghái",  country: "🇨🇳", date: "2025-03-23", raceTime: "15:00", sprint: true,  done: true },
+  { round: 3,  name: "Gran Premio de Japón",         circuit: "Circuito de Suzuka",                  country: "🇯🇵", date: "2025-04-06", raceTime: "14:00", sprint: false, done: true },
+  { round: 4,  name: "Gran Premio de Baréin",        circuit: "Circuito Internacional de Baréin",    country: "🇧🇭", date: "2025-04-13", raceTime: "18:00", sprint: false, done: true },
+  { round: 5,  name: "Gran Premio de Arabia Saudí",  circuit: "Circuito Urbano de Jeddah",           country: "🇸🇦", date: "2025-04-20", raceTime: "20:00", sprint: false, done: true },
+  { round: 6,  name: "Gran Premio de Miami",         circuit: "Autódromo Internacional de Miami",    country: "🇺🇸", date: "2025-05-04", raceTime: "15:30", sprint: true,  done: true },
+  { round: 7,  name: "Gran Premio de Emilia-Romaña", circuit: "Autodromo Enzo e Dino Ferrari",        country: "🇮🇹", date: "2025-05-18", raceTime: "15:00", sprint: false, done: true },
+  { round: 8,  name: "Gran Premio de Mónaco",        circuit: "Circuito de Mónaco",                  country: "🇲🇨", date: "2025-05-25", raceTime: "15:00", sprint: false, done: true },
+  { round: 9,  name: "Gran Premio de España",        circuit: "Circuit de Barcelona-Catalunya",       country: "🇪🇸", date: "2025-06-01", raceTime: "15:00", sprint: false, done: false },
+  { round: 10, name: "Gran Premio de Canadá",        circuit: "Circuito Gilles Villeneuve",          country: "🇨🇦", date: "2025-06-15", raceTime: "14:00", sprint: false, done: false },
+  { round: 11, name: "Gran Premio de Austria",       circuit: "Red Bull Ring",                       country: "🇦🇹", date: "2025-06-29", raceTime: "15:00", sprint: false, done: false },
+  { round: 12, name: "Gran Premio de Gran Bretaña",  circuit: "Circuito de Silverstone",             country: "🇬🇧", date: "2025-07-06", raceTime: "16:00", sprint: false, done: false },
+  { round: 13, name: "Gran Premio de Bélgica",       circuit: "Circuito de Spa-Francorchamps",       country: "🇧🇪", date: "2025-07-27", raceTime: "15:00", sprint: false, done: false },
+  { round: 14, name: "Gran Premio de Hungría",       circuit: "Hungaroring",                         country: "🇭🇺", date: "2025-08-03", raceTime: "15:00", sprint: false, done: false },
+  { round: 15, name: "Gran Premio de los Países Bajos", circuit: "Circuito de Zandvoort",            country: "🇳🇱", date: "2025-08-31", raceTime: "15:00", sprint: false, done: false },
+  { round: 16, name: "Gran Premio de Italia",        circuit: "Autodromo Nazionale di Monza",        country: "🇮🇹", date: "2025-09-07", raceTime: "15:00", sprint: false, done: false },
+  { round: 17, name: "Gran Premio de Azerbaiyán",    circuit: "Circuito Urbano de Bakú",             country: "🇦🇿", date: "2025-09-21", raceTime: "13:00", sprint: false, done: false },
+  { round: 18, name: "Gran Premio de Singapur",      circuit: "Circuito Urbano de Marina Bay",       country: "🇸🇬", date: "2025-10-05", raceTime: "20:00", sprint: false, done: false },
+  { round: 19, name: "Gran Premio de EE. UU.",       circuit: "Circuito de las Américas",            country: "🇺🇸", date: "2025-10-19", raceTime: "14:00", sprint: true,  done: false },
+  { round: 20, name: "Gran Premio de México",        circuit: "Autódromo Hermanos Rodríguez",        country: "🇲🇽", date: "2025-10-26", raceTime: "14:00", sprint: false, done: false },
+  { round: 21, name: "Gran Premio de Brasil",        circuit: "Autódromo de Interlagos",             country: "🇧🇷", date: "2025-11-09", raceTime: "14:00", sprint: true,  done: false },
+  { round: 22, name: "Gran Premio de Las Vegas",     circuit: "Circuito Urbano de Las Vegas",        country: "🇺🇸", date: "2025-11-22", raceTime: "22:00", sprint: false, done: false },
+  { round: 23, name: "Gran Premio de Qatar",         circuit: "Circuito Internacional de Losail",    country: "🇶🇦", date: "2025-11-30", raceTime: "20:00", sprint: true,  done: false },
+  { round: 24, name: "Gran Premio de Abu Dabi",      circuit: "Circuito de Yas Marina",              country: "🇦🇪", date: "2025-12-07", raceTime: "17:00", sprint: false, done: false },
+];
+
+const DRIVERS_2025 = [
+  { pos: 1,  name: "Max Verstappen",   team: "Red Bull Racing",  pts: 136, color: "#1E3860", abbr: "VER" },
+  { pos: 2,  name: "Lando Norris",     team: "McLaren",          pts: 131, color: "#FF8000", abbr: "NOR" },
+  { pos: 3,  name: "Charles Leclerc", team: "Ferrari",           pts: 98,  color: "#DC0000", abbr: "LEC" },
+  { pos: 4,  name: "Oscar Piastri",    team: "McLaren",          pts: 90,  color: "#FF8000", abbr: "PIA" },
+  { pos: 5,  name: "George Russell",  team: "Mercedes",          pts: 87,  color: "#00D2BE", abbr: "RUS" },
+  { pos: 6,  name: "Carlos Sainz",    team: "Williams",          pts: 68,  color: "#37BEDD", abbr: "SAI" },
+  { pos: 7,  name: "Lewis Hamilton",  team: "Ferrari",           pts: 60,  color: "#DC0000", abbr: "HAM" },
+  { pos: 8,  name: "Kimi Antonelli",  team: "Mercedes",          pts: 43,  color: "#00D2BE", abbr: "ANT" },
+  { pos: 9,  name: "Fernando Alonso", team: "Aston Martin",      pts: 34,  color: "#006F62", abbr: "ALO" },
+  { pos: 10, name: "Nico Hülkenberg", team: "Stake F1",          pts: 24,  color: "#52E252", abbr: "HUL" },
+];
+
+const CONSTRUCTORS_2025 = [
+  { pos: 1, name: "McLaren",          pts: 221, color: "#FF8000" },
+  { pos: 2, name: "Red Bull Racing",  pts: 148, color: "#1E3860" },
+  { pos: 3, name: "Ferrari",          pts: 158, color: "#DC0000" },
+  { pos: 4, name: "Mercedes",         pts: 130, color: "#00D2BE" },
+  { pos: 5, name: "Williams",         pts: 68,  color: "#37BEDD" },
+  { pos: 6, name: "Aston Martin",     pts: 34,  color: "#006F62" },
+  { pos: 7, name: "Alpine",           pts: 22,  color: "#0090FF" },
+  { pos: 8, name: "Haas",             pts: 20,  color: "#B6BABD" },
+  { pos: 9, name: "Racing Bulls",     pts: 16,  color: "#4169E1" },
+  { pos: 10,name: "Stake F1",         pts: 8,   color: "#52E252" },
+];
+
+const TEAMS_2025 = [
+  {
+    name: "Red Bull Racing", short: "Red Bull", color: "#1E3860", accent: "#3671C6",
+    bg: "linear-gradient(135deg, #0a0f1e 0%, #1E3860 60%, #3671C6 100%)",
+    drivers: ["Max Verstappen", "Yuki Tsunoda"],
+    chassis: "RB21", engine: "Honda RBPT",
+    championships: 6, desc: "El equipo dominante de la era híbrida. Con base en Milton Keynes, UK."
+  },
+  {
+    name: "Ferrari", short: "Ferrari", color: "#DC0000", accent: "#FF2800",
+    bg: "linear-gradient(135deg, #1a0000 0%, #6b0000 60%, #DC0000 100%)",
+    drivers: ["Charles Leclerc", "Lewis Hamilton"],
+    chassis: "SF-25", engine: "Ferrari",
+    championships: 16, desc: "La Scuderia más legendaria de la F1. Fábrica en Maranello, Italia."
+  },
+  {
+    name: "McLaren", short: "McLaren", color: "#FF8000", accent: "#FF9B2E",
+    bg: "linear-gradient(135deg, #1a0e00 0%, #7a3c00 60%, #FF8000 100%)",
+    drivers: ["Lando Norris", "Oscar Piastri"],
+    chassis: "MCL39", engine: "Mercedes",
+    championships: 8, desc: "El renacimiento papaya. Con base en Woking, UK."
+  },
+  {
+    name: "Mercedes", short: "Mercedes", color: "#00D2BE", accent: "#00f5e0",
+    bg: "linear-gradient(135deg, #001a18 0%, #005a52 60%, #00D2BE 100%)",
+    drivers: ["George Russell", "Kimi Antonelli"],
+    chassis: "W16", engine: "Mercedes",
+    championships: 8, desc: "La flecha plateada. Con base en Brackley, UK."
+  },
+  {
+    name: "Aston Martin", short: "Aston Martin", color: "#006F62", accent: "#00A693",
+    bg: "linear-gradient(135deg, #001a17 0%, #004d44 60%, #006F62 100%)",
+    drivers: ["Fernando Alonso", "Lance Stroll"],
+    chassis: "AMR25", engine: "Mercedes",
+    championships: 0, desc: "Verde británico de regreso a la élite. Con base en Silverstone, UK."
+  },
+  {
+    name: "Williams", short: "Williams", color: "#37BEDD", accent: "#64D4F0",
+    bg: "linear-gradient(135deg, #001825 0%, #135070 60%, #37BEDD 100%)",
+    drivers: ["Carlos Sainz", "Alexander Albon"],
+    chassis: "FW47", engine: "Mercedes",
+    championships: 7, desc: "El equipo más exitoso de constructores independientes. Grove, UK."
+  },
+  {
+    name: "Alpine", short: "Alpine", color: "#0090FF", accent: "#4DB3FF",
+    bg: "linear-gradient(135deg, #000a1a 0%, #003a70 60%, #0090FF 100%)",
+    drivers: ["Pierre Gasly", "Jack Doohan"],
+    chassis: "A525", engine: "Renault",
+    championships: 2, desc: "El proyecto de fábrica de Renault. Enstone, UK y Viry-Châtillon, FR."
+  },
+  {
+    name: "Haas", short: "Haas", color: "#B6BABD", accent: "#ffffff",
+    bg: "linear-gradient(135deg, #111111 0%, #333 60%, #B6BABD 100%)",
+    drivers: ["Esteban Ocon", "Oliver Bearman"],
+    chassis: "VF-25", engine: "Ferrari",
+    championships: 0, desc: "El único equipo americano de F1. Kannapolis, USA."
+  },
+  {
+    name: "Racing Bulls", short: "VCARB", color: "#4169E1", accent: "#6B8EFF",
+    bg: "linear-gradient(135deg, #060a18 0%, #1a2d70 60%, #4169E1 100%)",
+    drivers: ["Liam Lawson", "Isack Hadjar"],
+    chassis: "VCARB 02", engine: "Honda RBPT",
+    championships: 0, desc: "La academia Red Bull hecha equipo. Faenza, Italia."
+  },
+  {
+    name: "Stake F1", short: "Kick Sauber", color: "#52E252", accent: "#7AFF7A",
+    bg: "linear-gradient(135deg, #001a00 0%, #1a5c1a 60%, #52E252 100%)",
+    drivers: ["Nico Hülkenberg", "Gabriel Bortoleto"],
+    chassis: "C45", engine: "Ferrari",
+    championships: 0, desc: "En transición hacia la futura Audi F1. Hinwil, Suiza."
+  },
+];
+
+// ═══════════════════════════════════
+//  CLOCK
+// ═══════════════════════════════════
+function updateClock() {
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2,'0');
+  const m = String(now.getMinutes()).padStart(2,'0');
+  const s = String(now.getSeconds()).padStart(2,'0');
+  const el = document.getElementById('clock');
+  if (el) el.textContent = `${h}:${m}:${s}`;
+
+  const days = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+  const months = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  const dateEl = document.getElementById('clock-date');
+  if (dateEl) dateEl.textContent = `${days[now.getDay()]} ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+}
+
+setInterval(updateClock, 1000);
+updateClock();
+
+// ═══════════════════════════════════
+//  NEXT RACE + COUNTDOWN
+// ═══════════════════════════════════
+function getNextRace() {
+  const now = new Date();
+  return CALENDAR_2025.find(r => new Date(r.date) >= now);
+}
+
+function updateNextRace() {
+  const race = getNextRace();
+  if (!race) return;
+  const d = new Date(race.date);
+  const months = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  document.getElementById('next-race-round').textContent = `Ronda ${race.round}`;
+  document.getElementById('next-race-country').textContent = `${race.country} ${race.name.replace('Gran Premio de ','').replace('Gran Premio de los ','')}`;
+  document.getElementById('next-race-circuit').textContent = race.circuit;
+  document.getElementById('next-race-day').textContent = d.getDate();
+  document.getElementById('next-race-month').textContent = months[d.getMonth()];
+  document.getElementById('next-race-time').textContent = `Carrera: ${race.raceTime} hrs`;
+  document.getElementById('races-done').textContent = CALENDAR_2025.filter(r=>r.done).length;
+}
+
+function updateCountdown() {
+  const race = getNextRace();
+  if (!race) return;
+  const target = new Date(`${race.date}T${race.raceTime}:00`);
+  const now = new Date();
+  const diff = target - now;
+  if (diff <= 0) return;
+  const days = Math.floor(diff / 86400000);
+  const hours = Math.floor((diff % 86400000) / 3600000);
+  const mins = Math.floor((diff % 3600000) / 60000);
+  const secs = Math.floor((diff % 60000) / 1000);
+  document.getElementById('cd-days').textContent = String(days).padStart(2,'0');
+  document.getElementById('cd-hours').textContent = String(hours).padStart(2,'0');
+  document.getElementById('cd-mins').textContent = String(mins).padStart(2,'0');
+  document.getElementById('cd-secs').textContent = String(secs).padStart(2,'0');
+}
+
+updateNextRace();
+setInterval(updateCountdown, 1000);
+updateCountdown();
+
+// ═══════════════════════════════════
+//  NEWS (RSS via rss2json)
+// ═══════════════════════════════════
+const RSS_URL = 'https://www.motorsport.com/rss/f1/news/';
+const RSS_API = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(RSS_URL)}&api_key=public&count=12`;
+const FALLBACK_NEWS = [
+  { title: "Verstappen lidera el campeonato tras una nueva victoria dominante", category: "Carrera", source: "GridPulse", pubDate: "Hoy", link: "#", description: "El neerlandés mantiene su dominio en la temporada 2025 sumando otro triunfo convincente desde la pole position." },
+  { title: "Norris presiona a Verstappen en la lucha por el campeonato", category: "Campeonato", source: "GridPulse", pubDate: "Ayer", link: "#", description: "McLaren sigue siendo el coche más rápido del pelotón, y Norris no pierde esperanza de recortar la diferencia." },
+  { title: "Ferrari confirma cambios en el sidepod para la próxima carrera", category: "Técnica", source: "GridPulse", pubDate: "Hace 2 días", link: "#", description: "La Scuderia trae importantes actualizaciones aerodinámicas buscando recuperar terreno en la batalla de los constructores." },
+  { title: "Hamilton ya se siente como parte de Ferrari: 'Este es mi equipo'", category: "Paddock", source: "GridPulse", pubDate: "Hace 3 días", link: "#", description: "El heptacampeón habló sobre su adaptación al equipo italiano y sus expectativas para la segunda mitad de la temporada." },
+];
+
+async function loadNews() {
+  try {
+    const res = await fetch(RSS_API);
+    const data = await res.json();
+    if (data.status !== 'ok' || !data.items.length) throw new Error();
+    renderFeaturedNews(data.items);
+    renderNewsList(data.items.slice(1));
+    renderNoticiasGrid(data.items);
+  } catch(e) {
+    renderFeaturedNews(FALLBACK_NEWS, true);
+    renderNewsList(FALLBACK_NEWS.slice(1), true);
+    renderNoticiasGrid(FALLBACK_NEWS, true);
+  }
+}
+
+function timeAgo(dateStr) {
+  try {
+    const d = new Date(dateStr);
+    const diff = Date.now() - d;
+    if(diff < 3600000) return `Hace ${Math.floor(diff/60000)} min`;
+    if(diff < 86400000) return `Hace ${Math.floor(diff/3600000)} h`;
+    if(diff < 172800000) return 'Ayer';
+    return d.toLocaleDateString('es-ES', {day:'numeric', month:'short'});
+  } catch { return ''; }
+}
+
+function renderFeaturedNews(items, fallback=false) {
+  const item = items[0];
+  const el = document.getElementById('news-featured');
+  if (!el) return;
+  const imgUrl = item.enclosure?.link || item.thumbnail || '';
+  const cats = ['Carrera','Técnica','Campeonato','Paddock','Mercado'];
+  const cat = item.category || cats[Math.floor(Math.random()*cats.length)];
+  const time = fallback ? (item.pubDate || '') : timeAgo(item.pubDate);
+  el.innerHTML = `
+    <div class="news-featured-img">
+      ${imgUrl ? `<img src="${imgUrl}" alt="news" onerror="this.style.display='none'">` : ''}
+      <span class="news-cat">${cat}</span>
+      <span class="placeholder-icon">🏎️</span>
+    </div>
+    <div class="news-featured-body">
+      <div class="news-meta">
+        <span class="news-source">${item.author || item.source || 'F1 News'}</span>
+        <span class="news-time">${time}</span>
+      </div>
+      <div class="news-featured-title">${item.title}</div>
+      <div class="news-featured-desc">${(item.description||'').replace(/<[^>]+>/g,'').substring(0,120)}...</div>
+    </div>`;
+  el.onclick = () => item.link && item.link !== '#' && window.open(item.link, '_blank');
+}
+
+function renderNewsList(items, fallback=false) {
+  const el = document.getElementById('news-list');
+  if (!el) return;
+  const cats = ['Carrera','Técnica','Campeonato','Paddock'];
+  el.innerHTML = items.slice(0,4).map((item,i) => {
+    const cat = item.category || cats[i % cats.length];
+    const time = fallback ? (item.pubDate || '') : timeAgo(item.pubDate);
+    return `
+    <div class="news-item animate-in" onclick="${item.link && item.link!='#' ? `window.open('${item.link}','_blank')` : ''}">
+      <div class="news-item-num">0${i+2}</div>
+      <div class="news-item-body">
+        <div class="news-item-cat">${cat}</div>
+        <div class="news-item-title">${item.title}</div>
+        <div class="news-item-time">${time}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderNoticiasGrid(items, fallback=false) {
+  const el = document.getElementById('noticias-grid');
+  if (!el) return;
+  const cats = ['Carrera','Técnica','Campeonato','Paddock','Mercado','Reglamento'];
+  el.innerHTML = items.map((item,i) => {
+    const cat = item.category || cats[i % cats.length];
+    const imgUrl = item.enclosure?.link || item.thumbnail || '';
+    const time = fallback ? (item.pubDate || '') : timeAgo(item.pubDate);
+    return `
+    <div class="news-featured" onclick="${item.link && item.link!='#' ? `window.open('${item.link}','_blank')` : ''}" style="margin-bottom:0;">
+      <div class="news-featured-img" style="height:180px;">
+        ${imgUrl ? `<img src="${imgUrl}" alt="news" onerror="this.style.display='none'">` : ''}
+        <span class="news-cat">${cat}</span>
+        <span class="placeholder-icon">🏎️</span>
+      </div>
+      <div class="news-featured-body">
+        <div class="news-meta">
+          <span class="news-source">${item.author || 'F1 News'}</span>
+          <span class="news-time">${time}</span>
+        </div>
+        <div class="news-featured-title" style="font-size:1rem;">${item.title}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════
+//  STANDINGS
+// ═══════════════════════════════════
+let currentStandingsTab = 'drivers';
+let currentFullStandingsTab = 'drivers';
+
+function renderMiniStandings(type='drivers') {
+  const el = document.getElementById('mini-standings-list');
+  if (!el) return;
+  const data = type === 'drivers' ? DRIVERS_2025.slice(0,8) : CONSTRUCTORS_2025.slice(0,6);
+  el.innerHTML = data.map(item => `
+    <div class="driver-row">
+      <div class="driver-pos ${item.pos<=3?'top':''}">${item.pos}</div>
+      <div class="driver-color-bar" style="background:${item.color}"></div>
+      <div class="driver-info">
+        <div class="driver-name">${item.name}</div>
+        <div class="driver-team">${item.team}</div>
+      </div>
+      <div class="driver-pts">${item.pts}</div>
+    </div>`).join('');
+}
+
+function switchStandingsTab(type) {
+  currentStandingsTab = type;
+  document.getElementById('tab-drivers').classList.toggle('active', type==='drivers');
+  document.getElementById('tab-constructors').classList.toggle('active', type==='constructors');
+  renderMiniStandings(type);
+}
+
+renderMiniStandings();
+
+function renderFullStandings(type='drivers') {
+  const el = document.getElementById('full-standings-container');
+  if (!el) return;
+  const data = type === 'drivers' ? DRIVERS_2025 : CONSTRUCTORS_2025;
+  const maxPts = data[0].pts;
+  el.innerHTML = `
+    <div style="background:var(--panel); border:1px solid var(--border); overflow:hidden;">
+      <div style="display:grid; grid-template-columns:50px 3px 1fr auto auto; gap:0; background:var(--black); padding:10px 20px; border-bottom:1px solid var(--border);">
+        <span style="font-family:'Rajdhani',sans-serif;font-size:.65rem;font-weight:700;letter-spacing:.2em;color:var(--gray);text-transform:uppercase;">POS</span>
+        <span></span>
+        <span style="font-family:'Rajdhani',sans-serif;font-size:.65rem;font-weight:700;letter-spacing:.2em;color:var(--gray);text-transform:uppercase; padding-left:12px;">${type==='drivers'?'PILOTO':'EQUIPO'}</span>
+        <span style="font-family:'Rajdhani',sans-serif;font-size:.65rem;font-weight:700;letter-spacing:.2em;color:var(--gray);text-transform:uppercase; text-align:right; margin-right:20px;">DIFERENCIA</span>
+        <span style="font-family:'Rajdhani',sans-serif;font-size:.65rem;font-weight:700;letter-spacing:.2em;color:var(--gray);text-transform:uppercase; text-align:right; min-width:60px;">PTS</span>
+      </div>
+      ${data.map((item,idx) => {
+        const diff = idx === 0 ? '—' : `-${maxPts - item.pts}`;
+        const barW = Math.round((item.pts / maxPts) * 100);
+        return `
+        <div style="display:grid; grid-template-columns:50px 3px 1fr auto auto; gap:0; padding:14px 20px; border-bottom:1px solid var(--border); align-items:center; transition:background .15s; cursor:default;" onmouseover="this.style.background='rgba(255,255,255,0.03)'" onmouseout="this.style.background='transparent'">
+          <div style="font-family:'Orbitron',sans-serif;font-size:${item.pos<=3?'1.1rem':'0.9rem'};font-weight:700;color:${item.pos===1?'var(--accent)':item.pos<=3?'var(--white)':'var(--gray-mid)'};">${item.pos}</div>
+          <div style="width:3px;height:36px;background:${item.color};border-radius:2px;"></div>
+          <div style="padding-left:14px;">
+            <div style="font-family:'Rajdhani',sans-serif;font-size:1rem;font-weight:700;color:var(--white);">${item.name}</div>
+            ${type==='drivers'?`<div style="font-size:.7rem;color:var(--gray-mid);">${item.team}</div>`:''}
+            <div style="margin-top:6px;height:2px;background:var(--border);border-radius:2px;max-width:200px;">
+              <div style="height:100%;width:${barW}%;background:${item.color};border-radius:2px;transition:width .5s ease;"></div>
+            </div>
+          </div>
+          <div style="font-family:'Rajdhani',sans-serif;font-size:.85rem;color:var(--gray-mid);text-align:right;margin-right:20px;">${diff}</div>
+          <div style="font-family:'Orbitron',sans-serif;font-size:1.1rem;font-weight:700;color:var(--white);text-align:right;min-width:60px;">${item.pts}</div>
+        </div>`;
+      }).join('')}
+    </div>`;
+}
+
+function switchFullStandings(type) {
+  currentFullStandingsTab = type;
+  document.getElementById('full-tab-drivers').classList.toggle('active', type==='drivers');
+  document.getElementById('full-tab-constructors').classList.toggle('active', type==='constructors');
+  renderFullStandings(type);
+}
+
+// ═══════════════════════════════════
+//  CALENDARIO
+// ═══════════════════════════════════
+function renderCalendario() {
+  const el = document.getElementById('calendario-list');
+  if (!el) return;
+  const months = {};
+  CALENDAR_2025.forEach(r => {
+    const d = new Date(r.date);
+    const key = `${d.getFullYear()}-${d.getMonth()}`;
+    const label = d.toLocaleString('es-ES',{month:'long',year:'numeric'});
+    if (!months[key]) months[key] = { label, races: [] };
+    months[key].races.push(r);
+  });
+  const now = new Date();
+
+  el.innerHTML = Object.values(months).map(m => `
+    <div style="margin-bottom:32px;">
+      <div style="font-family:'Rajdhani',sans-serif;font-size:.7rem;font-weight:700;letter-spacing:.3em;color:var(--gray);text-transform:uppercase;padding-bottom:12px;border-bottom:1px solid var(--border);margin-bottom:16px;display:flex;align-items:center;gap:10px;">
+        <span style="display:block;width:3px;height:14px;background:var(--red);border-radius:2px;"></span>
+        ${m.label}
+      </div>
+      ${m.races.map(r => {
+        const d = new Date(r.date);
+        const isNext = !r.done && new Date(r.date) >= now && getNextRace()?.round === r.round;
+        const dayNames = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+        const monthsShort = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+        return `
+        <div style="display:flex;gap:0;align-items:stretch;border:1px solid ${isNext?'var(--red)':r.done?'var(--border)':'var(--border)'};background:${r.done?'var(--dark)':isNext?'rgba(232,0,45,0.04)':'var(--panel)'};margin-bottom:8px;transition:border-color .2s,background .2s;overflow:hidden;" 
+             onmouseover="this.style.borderColor='${r.done?'var(--border-light)':'var(--red)'}'" 
+             onmouseout="this.style.borderColor='${isNext?'var(--red)':r.done?'var(--border)':'var(--border)'}'">
+          <!-- Date Box -->
+          <div style="background:${r.done?'var(--border)':isNext?'var(--red)':'#1e1e1e'};min-width:72px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px 12px;flex-shrink:0;">
+            <div style="font-family:'Orbitron',sans-serif;font-size:1.4rem;font-weight:900;color:${r.done?'var(--gray-mid)':'var(--white)'};line-height:1;">${d.getDate()}</div>
+            <div style="font-family:'Rajdhani',sans-serif;font-size:.6rem;font-weight:700;letter-spacing:.15em;color:${r.done?'var(--gray-mid)':'rgba(255,255,255,0.7)'};text-transform:uppercase;">${monthsShort[d.getMonth()]}</div>
+            <div style="font-family:'Rajdhani',sans-serif;font-size:.55rem;color:${r.done?'var(--gray-mid)':'rgba(255,255,255,0.5)'};margin-top:2px;">${dayNames[d.getDay()]}</div>
+          </div>
+          <!-- Info -->
+          <div style="flex:1;padding:16px 20px;display:flex;flex-direction:column;justify-content:center;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;">
+              <span style="font-family:'Rajdhani',sans-serif;font-size:.65rem;font-weight:700;letter-spacing:.2em;color:var(--gray-mid);text-transform:uppercase;">Ronda ${r.round}</span>
+              ${r.sprint?`<span style="font-family:'Rajdhani',sans-serif;font-size:.6rem;font-weight:700;letter-spacing:.15em;color:var(--accent);background:rgba(255,215,0,0.1);border:1px solid rgba(255,215,0,0.3);padding:2px 8px;text-transform:uppercase;">Sprint</span>`:''}
+              ${r.done?`<span style="font-family:'Rajdhani',sans-serif;font-size:.6rem;font-weight:700;letter-spacing:.15em;color:var(--gray-mid);background:var(--border);padding:2px 8px;text-transform:uppercase;">Finalizado</span>`:''}
+              ${isNext?`<span style="font-family:'Rajdhani',sans-serif;font-size:.6rem;font-weight:700;letter-spacing:.15em;color:var(--red);background:rgba(232,0,45,0.1);border:1px solid rgba(232,0,45,0.3);padding:2px 8px;text-transform:uppercase;">Próxima</span>`:''}
+            </div>
+            <div style="font-family:'Rajdhani',sans-serif;font-size:1.1rem;font-weight:700;color:${r.done?'var(--gray)':'var(--white)'};line-height:1.2;">${r.country} ${r.name}</div>
+            <div style="font-size:.75rem;color:var(--gray-mid);margin-top:3px;">${r.circuit}</div>
+          </div>
+          <!-- Time -->
+          <div style="display:flex;flex-direction:column;align-items:flex-end;justify-content:center;padding:16px 20px;flex-shrink:0;">
+            <div style="font-family:'Orbitron',sans-serif;font-size:.9rem;font-weight:700;color:${r.done?'var(--gray-mid)':'var(--white)'};">${r.raceTime}</div>
+            <div style="font-family:'Rajdhani',sans-serif;font-size:.65rem;color:var(--gray-mid);letter-spacing:.1em;">LOCAL</div>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════
+//  EQUIPOS
+// ═══════════════════════════════════
+let activeTeam = null;
+
+function renderEquipos() {
+  const el = document.getElementById('equipos-container');
+  if (!el) return;
+  el.innerHTML = `
+    <!-- TEAM TABS -->
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:28px;" id="team-tabs">
+      ${TEAMS_2025.map((t,i) => `
+        <button onclick="selectTeam(${i})" id="team-tab-${i}"
+          style="font-family:'Rajdhani',sans-serif;font-size:.75rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+                 padding:8px 18px;border:1px solid ${i===0?t.color:'var(--border)'};background:${i===0?t.color+'22':'transparent'};
+                 color:${i===0?'var(--white)':'var(--gray)'};cursor:pointer;transition:all .2s;clip-path:polygon(0 0,calc(100% - 6px) 0,100% 100%,6px 100%);">
+          ${t.short}
+        </button>`).join('')}
+    </div>
+    <!-- TEAM CARD -->
+    <div id="team-detail"></div>`;
+
+  selectTeam(0);
+}
+
+function selectTeam(idx) {
+  activeTeam = idx;
+  const t = TEAMS_2025[idx];
+
+  // Update tabs
+  TEAMS_2025.forEach((team,i) => {
+    const tab = document.getElementById(`team-tab-${i}`);
+    if (!tab) return;
+    if (i === idx) {
+      tab.style.borderColor = team.color;
+      tab.style.background = team.color + '33';
+      tab.style.color = 'var(--white)';
+    } else {
+      tab.style.borderColor = 'var(--border)';
+      tab.style.background = 'transparent';
+      tab.style.color = 'var(--gray)';
+    }
+  });
+
+  const el = document.getElementById('team-detail');
+  if (!el) return;
+
+  const constrData = CONSTRUCTORS_2025.find(c => c.name === t.name);
+  const pts = constrData ? constrData.pts : '—';
+  const pos = constrData ? constrData.pos : '—';
+
+  el.style.opacity = '0';
+  setTimeout(() => {
+    el.innerHTML = `
+      <div style="border:1px solid ${t.color}44;overflow:hidden;background:var(--panel);">
+        <!-- Header -->
+        <div style="height:8px;background:${t.bg};"></div>
+        <div style="background:${t.bg};padding:32px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;">
+          <div>
+            <div style="font-family:'Orbitron',sans-serif;font-size:2rem;font-weight:900;color:white;text-shadow:0 0 30px ${t.color}66;">${t.name}</div>
+            <div style="font-family:'Rajdhani',sans-serif;font-size:.8rem;font-weight:600;letter-spacing:.2em;color:rgba(255,255,255,0.5);text-transform:uppercase;margin-top:4px;">${t.chassis} · ${t.engine}</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-family:'Orbitron',sans-serif;font-size:3rem;font-weight:900;color:white;line-height:1;">${pts}</div>
+            <div style="font-family:'Rajdhani',sans-serif;font-size:.7rem;font-weight:700;letter-spacing:.2em;color:rgba(255,255,255,0.5);text-transform:uppercase;">Puntos 2025</div>
+          </div>
+        </div>
+        <!-- Body -->
+        <div style="padding:28px;display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+          <!-- Drivers -->
+          <div>
+            <div style="font-family:'Rajdhani',sans-serif;font-size:.65rem;font-weight:700;letter-spacing:.25em;color:var(--gray);text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:8px;"><span style="width:3px;height:12px;background:${t.color};display:block;border-radius:2px;"></span>Pilotos 2025</div>
+            ${t.drivers.map(d => {
+              const driverData = DRIVERS_2025.find(dr => dr.name === d);
+              return `
+              <div style="display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid var(--border);">
+                <div style="width:3px;height:40px;background:${t.color};border-radius:2px;flex-shrink:0;"></div>
+                <div>
+                  <div style="font-family:'Rajdhani',sans-serif;font-size:1rem;font-weight:700;color:var(--white);">${d}</div>
+                  ${driverData ? `<div style="font-size:.7rem;color:var(--gray-mid);">${driverData.pts} pts · P${driverData.pos} en campeonato</div>` : ''}
+                </div>
+              </div>`;
+            }).join('')}
+          </div>
+          <!-- Stats -->
+          <div>
+            <div style="font-family:'Rajdhani',sans-serif;font-size:.65rem;font-weight:700;letter-spacing:.25em;color:var(--gray);text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:8px;"><span style="width:3px;height:12px;background:${t.color};display:block;border-radius:2px;"></span>Temporada 2025</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+              ${[['Posición', `P${pos}`],['Puntos',pts],['Campeonatos',t.championships],['Motor',t.engine]].map(([label,val]) => `
+              <div style="background:var(--dark);padding:14px;border:1px solid var(--border);">
+                <div style="font-family:'Orbitron',sans-serif;font-size:1.3rem;font-weight:700;color:${t.color};line-height:1;">${val}</div>
+                <div style="font-family:'Rajdhani',sans-serif;font-size:.65rem;font-weight:600;letter-spacing:.15em;color:var(--gray-mid);text-transform:uppercase;margin-top:4px;">${label}</div>
+              </div>`).join('')}
+            </div>
+            <div style="margin-top:16px;padding:16px;background:var(--dark);border:1px solid var(--border);">
+              <p style="font-size:.85rem;color:var(--gray);line-height:1.6;">${t.desc}</p>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    el.style.transition = 'opacity .3s ease';
+    el.style.opacity = '1';
+  }, 100);
+}
+
+// ═══════════════════════════════════
+//  FORO / PIT TALK
+// ═══════════════════════════════════
+let foroTopics = [];
+
+function loadForo() {
+  try {
+    const stored = localStorage.getItem('gridpulse_foro');
+    foroTopics = stored ? JSON.parse(stored) : getDefaultTopics();
+  } catch {
+    foroTopics = getDefaultTopics();
+  }
+}
+
+function saveForo() {
+  try { localStorage.setItem('gridpulse_foro', JSON.stringify(foroTopics)); } catch {}
+}
+
+function getDefaultTopics() {
+  return [
+    {
+      id: 1, author: "FastLapFan", avatar: "F", time: "Hace 2 h",
+      title: "¿Puede alguien detener a Verstappen este año?",
+      body: "Después de las últimas carreras, parece que Max está en otro nivel. McLaren tiene el coche más rápido pero no logran convertirlo en victorias consistentes. ¿Qué opinan?",
+      votes: 47, tag: "Debate",
+      replies: [
+        { author: "NorrisFan99", avatar: "N", time: "Hace 1 h", body: "Lando lo conseguirá. Solo necesita no tener mala suerte. El MCL39 es claramente superior al RB21.", votes: 22 },
+        { author: "TifossiRojo", avatar: "T", time: "Hace 45 min", body: "Ferrari va a despertar en la segunda mitad. Hamilton + Leclerc es una combinación brutal.", votes: 15 },
+      ]
+    },
+    {
+      id: 2, author: "GridMaster", avatar: "G", time: "Hace 5 h",
+      title: "El GP de Mónaco sigue siendo irrelevante en la Fórmula 1 moderna",
+      body: "Ver 78 vueltas sin adelantamientos no es racing. ¿No deberían quitarlo del calendario o cambiar el reglamento para permitir más acción?",
+      votes: 31, tag: "Opinión",
+      replies: [
+        { author: "ClassicF1", avatar: "C", time: "Hace 4 h", body: "Mónaco es la historia de la F1. Sin Mónaco, la F1 pierde su alma. No todo tiene que ser DRS y neumáticos de degradación.", votes: 34 },
+      ]
+    },
+    {
+      id: 3, author: "TechTalk_F1", avatar: "T", time: "Hace 1 día",
+      title: "Las actualizaciones de Ferrari para la segunda mitad son impresionantes",
+      body: "Según los medios técnicos, Ferrari trae un sidepod completamente rediseñado. Si esto funciona, la batalla por el campeonato va a ser épica.",
+      votes: 58, tag: "Técnica",
+      replies: []
+    }
+  ];
+}
+
+function renderForo() {
+  loadForo();
+  const el = document.getElementById('foro-container');
+  if (!el) return;
+  el.innerHTML = `
+    <!-- NEW TOPIC -->
+    <div style="background:var(--panel);border:1px solid var(--border);border-top:3px solid var(--red);padding:24px;margin-bottom:28px;">
+      <div style="font-family:'Rajdhani',sans-serif;font-size:.7rem;font-weight:700;letter-spacing:.25em;color:var(--gray);text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;gap:8px;"><span style="width:3px;height:14px;background:var(--red);display:block;border-radius:2px;"></span>Nueva Publicación</div>
+      <input id="foro-author" placeholder="Tu nombre..." style="width:100%;background:var(--dark);border:1px solid var(--border);color:var(--white);padding:10px 14px;font-family:'Rajdhani',sans-serif;font-size:.9rem;margin-bottom:10px;outline:none;" onfocus="this.style.borderColor='var(--red)'" onblur="this.style.borderColor='var(--border)'">
+      <input id="foro-title" placeholder="Título de tu publicación..." style="width:100%;background:var(--dark);border:1px solid var(--border);color:var(--white);padding:10px 14px;font-family:'Rajdhani',sans-serif;font-size:.9rem;margin-bottom:10px;outline:none;" onfocus="this.style.borderColor='var(--red)'" onblur="this.style.borderColor='var(--border)'">
+      <textarea id="foro-body" placeholder="¿Qué opinas?" rows="3" style="width:100%;background:var(--dark);border:1px solid var(--border);color:var(--white);padding:10px 14px;font-family:'Inter',sans-serif;font-size:.85rem;resize:vertical;margin-bottom:12px;outline:none;line-height:1.6;" onfocus="this.style.borderColor='var(--red)'" onblur="this.style.borderColor='var(--border)'"></textarea>
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+        <select id="foro-tag" style="background:var(--dark);border:1px solid var(--border);color:var(--gray);padding:8px 12px;font-family:'Rajdhani',sans-serif;font-size:.8rem;letter-spacing:.1em;cursor:pointer;">
+          <option>Debate</option><option>Opinión</option><option>Técnica</option><option>Humor</option><option>Noticia</option>
+        </select>
+        <button onclick="postTopic()" style="background:var(--red);color:white;border:none;padding:10px 28px;font-family:'Rajdhani',sans-serif;font-size:.85rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;clip-path:polygon(0 0,calc(100% - 8px) 0,100% 100%,8px 100%);transition:background .2s;" onmouseover="this.style.background='var(--red-dark)'" onmouseout="this.style.background='var(--red)'">Publicar →</button>
+      </div>
+    </div>
+
+    <!-- TOPICS -->
+    <div id="topics-list">
+      ${renderTopicsHTML()}
+    </div>`;
+}
+
+function renderTopicsHTML() {
+  return foroTopics.map(topic => `
+    <div style="background:var(--panel);border:1px solid var(--border);margin-bottom:16px;transition:border-color .2s;" id="topic-${topic.id}">
+      <!-- Topic Header -->
+      <div style="padding:20px;border-bottom:1px solid var(--border);">
+        <div style="display:flex;align-items:flex-start;gap:14px;">
+          <div style="width:40px;height:40px;background:var(--red);display:flex;align-items:center;justify-content:center;font-family:'Orbitron',sans-serif;font-weight:700;font-size:.9rem;color:white;flex-shrink:0;">${topic.avatar}</div>
+          <div style="flex:1;">
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px;">
+              <span style="font-family:'Rajdhani',sans-serif;font-size:.85rem;font-weight:700;color:var(--white);">${topic.author}</span>
+              <span style="font-family:'Rajdhani',sans-serif;font-size:.65rem;font-weight:700;letter-spacing:.15em;color:var(--red);background:rgba(232,0,45,0.1);border:1px solid rgba(232,0,45,0.2);padding:2px 8px;text-transform:uppercase;">${topic.tag}</span>
+              <span style="font-size:.7rem;color:var(--gray-mid);">${topic.time}</span>
+            </div>
+            <div style="font-family:'Rajdhani',sans-serif;font-size:1.1rem;font-weight:700;color:var(--white);margin-bottom:8px;">${topic.title}</div>
+            <p style="font-size:.85rem;color:var(--gray);line-height:1.6;">${topic.body}</p>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:20px;margin-top:14px;padding-top:14px;border-top:1px solid var(--border);">
+          <button onclick="voteTopic(${topic.id})" style="display:flex;align-items:center;gap:6px;background:transparent;border:1px solid var(--border);color:var(--gray);padding:6px 14px;cursor:pointer;font-family:'Rajdhani',sans-serif;font-size:.8rem;font-weight:600;letter-spacing:.1em;transition:all .2s;" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--red)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--gray)'">▲ ${topic.votes}</button>
+          <span style="font-family:'Rajdhani',sans-serif;font-size:.75rem;color:var(--gray-mid);">💬 ${topic.replies.length} respuestas</span>
+        </div>
+      </div>
+      <!-- Replies -->
+      ${topic.replies.length > 0 ? `
+      <div style="padding:0 20px;">
+        ${topic.replies.map(r => `
+        <div style="display:flex;gap:12px;padding:14px 0;border-bottom:1px solid var(--border);">
+          <div style="width:32px;height:32px;background:var(--border);display:flex;align-items:center;justify-content:center;font-family:'Orbitron',sans-serif;font-weight:700;font-size:.75rem;color:var(--gray);flex-shrink:0;">${r.avatar}</div>
+          <div style="flex:1;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;">
+              <span style="font-family:'Rajdhani',sans-serif;font-size:.8rem;font-weight:700;color:var(--white);">${r.author}</span>
+              <span style="font-size:.65rem;color:var(--gray-mid);">${r.time}</span>
+            </div>
+            <p style="font-size:.82rem;color:var(--gray);line-height:1.6;">${r.body}</p>
+          </div>
+          <div style="font-family:'Rajdhani',sans-serif;font-size:.75rem;color:var(--gray-mid);flex-shrink:0;padding-top:4px;">▲ ${r.votes}</div>
+        </div>`).join('')}
+      </div>` : ''}
+      <!-- Reply input -->
+      <div style="padding:14px 20px;display:flex;gap:10px;">
+        <input id="reply-author-${topic.id}" placeholder="Tu nombre" style="width:130px;background:var(--dark);border:1px solid var(--border);color:var(--white);padding:8px 10px;font-family:'Rajdhani',sans-serif;font-size:.82rem;outline:none;flex-shrink:0;" onfocus="this.style.borderColor='var(--red)'" onblur="this.style.borderColor='var(--border)'">
+        <input id="reply-body-${topic.id}" placeholder="Escribe tu respuesta..." style="flex:1;background:var(--dark);border:1px solid var(--border);color:var(--white);padding:8px 12px;font-family:'Inter',sans-serif;font-size:.82rem;outline:none;" onfocus="this.style.borderColor='var(--red)'" onblur="this.style.borderColor='var(--border)'">
+        <button onclick="postReply(${topic.id})" style="background:var(--panel);color:var(--gray);border:1px solid var(--border);padding:8px 16px;font-family:'Rajdhani',sans-serif;font-size:.8rem;font-weight:700;letter-spacing:.1em;cursor:pointer;transition:all .2s;white-space:nowrap;" onmouseover="this.style.background='var(--red)';this.style.color='white';this.style.borderColor='var(--red)'" onmouseout="this.style.background='var(--panel)';this.style.color='var(--gray)';this.style.borderColor='var(--border)'">Responder</button>
+      </div>
+    </div>`).join('');
+}
+
+function postTopic() {
+  const author = document.getElementById('foro-author').value.trim() || 'Anónimo';
+  const title = document.getElementById('foro-title').value.trim();
+  const body = document.getElementById('foro-body').value.trim();
+  const tag = document.getElementById('foro-tag').value;
+  if (!title || !body) { alert('Por favor completa el título y el texto.'); return; }
+  const newTopic = {
+    id: Date.now(),
+    author, avatar: author[0].toUpperCase(),
+    time: 'Ahora mismo', title, body, votes: 0, tag, replies: []
+  };
+  foroTopics.unshift(newTopic);
+  saveForo();
+  document.getElementById('foro-author').value = '';
+  document.getElementById('foro-title').value = '';
+  document.getElementById('foro-body').value = '';
+  document.getElementById('topics-list').innerHTML = renderTopicsHTML();
+}
+
+function postReply(topicId) {
+  const author = document.getElementById(`reply-author-${topicId}`).value.trim() || 'Anónimo';
+  const body = document.getElementById(`reply-body-${topicId}`).value.trim();
+  if (!body) return;
+  const topic = foroTopics.find(t => t.id === topicId);
+  if (!topic) return;
+  topic.replies.push({ author, avatar: author[0].toUpperCase(), time: 'Ahora mismo', body, votes: 0 });
+  saveForo();
+  document.getElementById('topics-list').innerHTML = renderTopicsHTML();
+}
+
+function voteTopic(topicId) {
+  const topic = foroTopics.find(t => t.id === topicId);
+  if (topic) { topic.votes++; saveForo(); document.getElementById('topics-list').innerHTML = renderTopicsHTML(); }
+}
+
+// ═══════════════════════════════════
+//  NAVIGATION
+// ═══════════════════════════════════
+const sections = ['home','noticias','calendario','standings','equipos','foro'];
+
+function showSection(name) {
+  sections.forEach(s => {
+    const el = document.getElementById(`section-${s}`);
+    if (el) el.classList.toggle('active', s === name);
+    const nav = document.getElementById(`nav-${s}`);
+    if (nav) nav.classList.toggle('active', s === name);
+  });
+
+  // Lazy render
+  if (name === 'calendario') renderCalendario();
+  if (name === 'standings') renderFullStandings(currentFullStandingsTab);
+  if (name === 'equipos') renderEquipos();
+  if (name === 'foro') renderForo();
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function toggleMenu() {
+  document.getElementById('mobile-nav').classList.toggle('open');
+}
+
+// ═══════════════════════════════════
+//  INIT
+// ═══════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  loadNews();
+  renderMiniStandings();
+});
+</script>
+</body>
+</html>

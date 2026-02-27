@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GridPulse · Standings F1 2025</title>
+<link rel="stylesheet" href="gridpulse.css">
+<style>
+.std-page-tabs {
+  display: flex;
+  background: var(--dark);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 32px;
+  width: fit-content;
+}
+.std-page-tab {
+  font-family: var(--font-ui);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 12px 32px;
+  background: transparent;
+  border: none;
+  color: var(--gray);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.std-page-tab:hover  { color: var(--white); background: rgba(255,255,255,0.04); }
+.std-page-tab.active { background: var(--red); color: white; }
+
+.std-section { display: none; }
+.std-section.active { display: block; }
+
+.std-layout {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 28px;
+  align-items: start;
+}
+
+.leader-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--red);
+  border-radius: var(--radius-md);
+  padding: 22px 26px;
+  margin-bottom: 26px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+  position: relative;
+  overflow: hidden;
+  min-height: 80px;
+}
+.leader-card::after {
+  content: '01';
+  position: absolute;
+  right: -10px; top: 50%;
+  transform: translateY(-50%);
+  font-family: var(--font-display);
+  font-size: 7rem;
+  font-weight: 900;
+  color: var(--white);
+  opacity: 0.03;
+  pointer-events: none;
+}
+.leader-stripe {
+  width: 5px;
+  align-self: stretch;
+  min-height: 50px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+.leader-badge {
+  background: var(--red);
+  clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 100%, 8px 100%);
+  padding: 5px 16px;
+  font-family: var(--font-display);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: white;
+  text-transform: uppercase;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.leader-info { flex: 1; min-width: 130px; }
+.leader-name {
+  font-family: var(--font-display);
+  font-size: clamp(1rem, 2.4vw, 1.65rem);
+  font-weight: 900;
+  color: var(--white);
+  line-height: 1.1;
+}
+.leader-sub {
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  margin-top: 3px;
+  letter-spacing: 0.05em;
+}
+.leader-stat { text-align: center; flex-shrink: 0; }
+.leader-stat-num {
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 3vw, 2.4rem);
+  font-weight: 900;
+  color: var(--white);
+  line-height: 1;
+}
+.leader-stat-label {
+  font-family: var(--font-ui);
+  font-size: 0.56rem;
+  font-weight: 700;
+  letter-spacing: 0.25em;
+  color: var(--gray-mid);
+  text-transform: uppercase;
+  margin-top: 3px;
+}
+
+.std-table {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+.std-thead {
+  display: grid;
+  padding: 9px 20px;
+  background: var(--black);
+  border-bottom: 1px solid var(--border);
+  gap: 12px;
+}
+.std-thead span {
+  font-family: var(--font-ui);
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.25em;
+  color: var(--gray-mid);
+  text-transform: uppercase;
+}
+.col-d { grid-template-columns: 38px 4px 1fr 38px 42px 66px; }
+.col-c { grid-template-columns: 38px 4px 1fr 42px 66px; }
+
+.std-row {
+  display: grid;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+  transition: background var(--transition);
+}
+.std-row:last-child { border-bottom: none; }
+.std-row:hover { background: rgba(255,255,255,0.022); }
+.std-row::before {
+  content: '';
+  position: absolute;
+  left:0; top:0; bottom:0;
+  width: 0;
+  background: var(--red);
+  transition: width 0.18s;
+}
+.std-row:hover::before { width: 3px; }
+.std-cells {
+  display: grid;
+  padding: 12px 20px;
+  align-items: center;
+  gap: 12px;
+}
+
+.std-pos {
+  font-family: var(--font-display);
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--gray-mid);
+  text-align: center;
+}
+.std-pos.p1 { color: var(--gold);   font-size: 1rem; }
+.std-pos.p2 { color: var(--silver); }
+.std-pos.p3 { color: var(--bronze); }
+
+.std-bar { width: 4px; min-height: 30px; border-radius: 2px; align-self: stretch; }
+
+.std-driver-name {
+  font-family: var(--font-ui);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--white);
+  line-height: 1.2;
+}
+.std-driver-team { font-size: 0.64rem; color: var(--gray-mid); margin-top: 1px; }
+.std-progress {
+  height: 2px;
+  background: var(--border);
+  border-radius: 2px;
+  margin-top: 5px;
+  max-width: 190px;
+  overflow: hidden;
+}
+.std-progress-fill {
+  height: 100%;
+  border-radius: 2px;
+  width: 0;
+  transition: width 1.1s cubic-bezier(.4,0,.2,1);
+}
+
+.std-code {
+  font-family: var(--font-display);
+  font-size: 0.64rem;
+  font-weight: 700;
+  color: var(--gray-dark);
+  letter-spacing: 0.08em;
+  text-align: center;
+}
+.std-wins-cell {
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--gray);
+  text-align: center;
+}
+.std-pts { font-family: var(--font-display); font-size: 1.08rem; font-weight: 700; color: var(--white); text-align: right; }
+.std-diff { font-size: 0.63rem; color: var(--gray-mid); text-align: right; margin-top: 1px; }
+
+/* SIDEBAR */
+.side-panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+.side-panel-head {
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-ui);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.25em;
+  color: var(--gray);
+  text-transform: uppercase;
+}
+.side-panel-head::before {
+  content: '';
+  width: 3px; height: 12px;
+  background: var(--red);
+  border-radius: 2px;
+  display: block;
+  flex-shrink: 0;
+}
+
+.gap-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px;
+  border-bottom: 1px solid var(--border);
+}
+.gap-row:last-child { border-bottom: none; }
+.gap-name {
+  font-family: var(--font-ui);
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--white);
+  min-width: 96px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.gap-bar-wrap { flex: 1; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+.gap-fill { height: 100%; border-radius: 2px; width: 0; transition: width 1.3s cubic-bezier(.4,0,.2,1); }
+.gap-pts { font-family: var(--font-display); font-size: 0.74rem; font-weight: 700; color: var(--white); min-width: 30px; text-align: right; }
+.gap-diff { font-family: var(--font-ui); font-size: 0.62rem; color: var(--gray-mid); min-width: 40px; text-align: right; }
+
+.result-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 18px;
+  border-bottom: 1px solid var(--border);
+  transition: background var(--transition);
+}
+.result-row:hover { background: rgba(255,255,255,0.02); }
+.result-row:last-child { border-bottom: none; }
+.result-pos { font-family: var(--font-display); font-size: 0.88rem; font-weight: 700; color: var(--gray-mid); min-width: 20px; text-align: center; }
+.result-pos.p1 { color: var(--gold); }
+.result-pos.p2 { color: var(--silver); }
+.result-pos.p3 { color: var(--bronze); }
+.result-stripe { width: 3px; height: 24px; border-radius: 2px; flex-shrink: 0; }
+.result-name { font-family: var(--font-ui); font-size: 0.84rem; font-weight: 700; color: var(--white); flex: 1; }
+.result-team { font-size: 0.62rem; color: var(--gray-mid); }
+.result-pts { font-family: var(--font-display); font-size: 0.78rem; font-weight: 700; }
+
+/* Source pill */
+.source-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-ui);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 4px 12px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  color: var(--gray-mid);
+}
+.source-pill.live  { border-color: rgba(0,200,80,.4);  color:#00c850; background:rgba(0,200,80,.06);  }
+.source-pill.cache { border-color: rgba(212,175,55,.4);color:var(--gold); background:rgba(212,175,55,.06); }
+.source-pill.local { border-color: var(--border-lit);  color:var(--gray); }
+
+.api-notice {
+  display: none;
+  align-items: center;
+  gap: 10px;
+  background: rgba(212,175,55,.05);
+  border: 1px solid rgba(212,175,55,.2);
+  border-radius: var(--radius);
+  padding: 10px 16px;
+  margin-bottom: 18px;
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  color: var(--gold);
+}
+
+@media (max-width: 960px) { .std-layout { grid-template-columns: 1fr; } }
+@media (max-width: 540px) {
+  .col-d { grid-template-columns: 30px 4px 1fr 54px; }
+  .std-code, .std-wins-cell { display: none; }
+}
+</style>
+</head>
+<body>
+
+<header class="gp-header">
+  <div class="gp-container gp-header-inner">
+    <a href="index.html" class="gp-logo">
+      <div class="gp-logo-mark"><svg viewBox="0 0 24 24" fill="white"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+      <span class="gp-logo-text">Grid<span>Pulse</span></span>
+    </a>
+    <nav class="gp-nav">
+      <a href="index.html"      class="gp-nav-link">Home</a>
+      <a href="noticias.html"   class="gp-nav-link">Noticias</a>
+      <a href="calendario.html" class="gp-nav-link">Calendario</a>
+      <a href="standings.html"  class="gp-nav-link active">Standings</a>
+      <a href="equipos.html"    class="gp-nav-link">Equipos</a>
+      <a href="pittalk.html"    class="gp-nav-link">Pit Talk</a>
+    </nav>
+    <div class="gp-clock-wrap">
+      <div class="gp-live-pill"><div class="gp-live-dot"></div>LIVE</div>
+      <div>
+        <div class="gp-clock" id="gp-clock">--:--:--</div>
+        <div class="gp-clock-date" id="gp-clock-date">---</div>
+      </div>
+    </div>
+    <button class="gp-hamburger" id="gp-hamburger" onclick="gpToggleMenu()"><span></span><span></span><span></span></button>
+  </div>
+</header>
+
+<nav class="gp-mobile-nav" id="gp-mobile-nav">
+  <a href="index.html">🏠 Home</a>
+  <a href="noticias.html">📰 Noticias</a>
+  <a href="calendario.html">📅 Calendario</a>
+  <a href="standings.html" class="active">🏆 Standings</a>
+  <a href="equipos.html">🏎️ Equipos</a>
+  <a href="pittalk.html">💬 Pit Talk</a>
+</nav>
+
+<main class="gp-page">
+<div class="gp-container">
+
+  <div class="gp-section-header gp-anim-fadeUp">
+    <div>
+      <div class="gp-section-eyebrow">Campeonato Mundial 2025</div>
+      <div class="gp-section-title">Clasificación F1</div>
+    </div>
+    <div id="source-badge"></div>
+  </div>
+
+  <div class="api-notice" id="notice-jolpika">⚠️ OpenF1 no disponible. Usando Jolpica/Ergast como respaldo.</div>
+  <div class="api-notice" id="notice-local">⚠️ APIs no disponibles. Mostrando últimos datos locales — Ronda 8 · Mónaco.</div>
+
+  <div class="gp-loading" id="std-loading">
+    <div class="gp-spinner"></div>
+    <span id="load-msg">Conectando con OpenF1 API…</span>
+  </div>
+
+  <div class="std-page-tabs" id="std-tabs" style="display:none;">
+    <button class="std-page-tab active" onclick="switchTab('d',this)">🏎️ Pilotos</button>
+    <button class="std-page-tab"        onclick="switchTab('c',this)">🔧 Constructores</button>
+  </div>
+
+  <!-- DRIVERS -->
+  <div class="std-section active" id="sec-d">
+    <div class="leader-card" id="leader-d"><div class="gp-loading"><div class="gp-spinner"></div></div></div>
+    <div class="std-layout">
+      <div>
+        <div class="std-table">
+          <div class="std-thead col-d">
+            <span style="text-align:center">POS</span><span></span>
+            <span>PILOTO</span>
+            <span style="text-align:center">NUM</span>
+            <span style="text-align:center">VIC</span>
+            <span style="text-align:right">PTS</span>
+          </div>
+          <div id="rows-d"></div>
+        </div>
+      </div>
+      <div>
+        <div class="side-panel">
+          <div class="side-panel-head">Diferencia al Líder</div>
+          <div id="gap-d"></div>
+        </div>
+        <div class="side-panel">
+          <div class="side-panel-head" id="last-race-title">Último GP · Mónaco 2025</div>
+          <div id="last-race"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONSTRUCTORS -->
+  <div class="std-section" id="sec-c">
+    <div class="leader-card" id="leader-c"><div class="gp-loading"><div class="gp-spinner"></div></div></div>
+    <div class="std-layout">
+      <div>
+        <div class="std-table">
+          <div class="std-thead col-c">
+            <span style="text-align:center">POS</span><span></span>
+            <span>CONSTRUCTOR</span>
+            <span style="text-align:center">VIC</span>
+            <span style="text-align:right">PTS</span>
+          </div>
+          <div id="rows-c"></div>
+        </div>
+      </div>
+      <div>
+        <div class="side-panel">
+          <div class="side-panel-head">Diferencia al Líder</div>
+          <div id="gap-c"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</main>
+
+<footer class="gp-footer">
+  <div class="gp-container">
+    <div class="gp-footer-inner">
+      <div class="gp-footer-brand">
+        <div class="gp-footer-brand-name">Grid<span>Pulse</span></div>
+        <p class="gp-footer-desc">Datos en tiempo real vía OpenF1. Respaldo automático con Jolpica/Ergast.</p>
+      </div>
+      <div class="gp-footer-col">
+        <h4>Secciones</h4>
+        <ul class="gp-footer-links">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="calendario.html">Calendario</a></li>
+          <li><a href="equipos.html">Equipos</a></li>
+          <li><a href="pittalk.html">Pit Talk</a></li>
+        </ul>
+      </div>
+      <div class="gp-footer-col">
+        <h4>APIs Usadas</h4>
+        <ul class="gp-footer-links">
+          <li><a href="https://openf1.org" target="_blank">OpenF1 (Principal)</a></li>
+          <li><a href="https://jolpi.ca"   target="_blank">Jolpica (Respaldo)</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="gp-footer-bottom">
+      <span class="gp-footer-copy">© 2025 GridPulse — Para fans, por fans.</span>
+      <span class="gp-footer-tag">FORMULA 1 FAN PAGE</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+// ─── TEAM COLORS ─────────────────────────────────
+const TC = {
+  'red bull':'#3671C6','redbull':'#3671C6','mclaren':'#FF8000',
+  'ferrari':'#DC0000','mercedes':'#00D2BE','aston martin':'#006F62',
+  'aston':'#006F62','alpine':'#0090FF','williams':'#37BEDD',
+  'haas':'#B6BABD','racing bulls':'#4169E1','rb':'#4169E1',
+  'vcarb':'#4169E1','kick sauber':'#52E252','sauber':'#52E252','stake':'#52E252',
+};
+const tc = n => { const l = (n||'').toLowerCase(); return TC[Object.keys(TC).find(k=>l.includes(k))] || '#888'; };
+
+// ─── LOCAL FALLBACK — R8 Mónaco ──────────────────
+const LD = [
+  {position:1, full_name:'Max Verstappen',    team_name:'Red Bull Racing', points:136,wins:4,  driver_number:1  },
+  {position:2, full_name:'Lando Norris',      team_name:'McLaren',         points:131,wins:3,  driver_number:4  },
+  {position:3, full_name:'Charles Leclerc',   team_name:'Ferrari',         points:98, wins:1,  driver_number:16 },
+  {position:4, full_name:'Oscar Piastri',     team_name:'McLaren',         points:90, wins:0,  driver_number:81 },
+  {position:5, full_name:'George Russell',    team_name:'Mercedes',        points:87, wins:0,  driver_number:63 },
+  {position:6, full_name:'Carlos Sainz',      team_name:'Williams',        points:68, wins:0,  driver_number:55 },
+  {position:7, full_name:'Lewis Hamilton',    team_name:'Ferrari',         points:60, wins:0,  driver_number:44 },
+  {position:8, full_name:'Kimi Antonelli',    team_name:'Mercedes',        points:43, wins:0,  driver_number:12 },
+  {position:9, full_name:'Fernando Alonso',   team_name:'Aston Martin',    points:34, wins:0,  driver_number:14 },
+  {position:10,full_name:'Nico Hülkenberg',  team_name:'Kick Sauber',     points:24, wins:0,  driver_number:27 },
+  {position:11,full_name:'Esteban Ocon',      team_name:'Haas',            points:18, wins:0,  driver_number:31 },
+  {position:12,full_name:'Pierre Gasly',      team_name:'Alpine',          points:16, wins:0,  driver_number:10 },
+  {position:13,full_name:'Alexander Albon',   team_name:'Williams',        points:14, wins:0,  driver_number:23 },
+  {position:14,full_name:'Liam Lawson',       team_name:'Racing Bulls',    points:12, wins:0,  driver_number:30 },
+  {position:15,full_name:'Oliver Bearman',    team_name:'Haas',            points:8,  wins:0,  driver_number:87 },
+  {position:16,full_name:'Isack Hadjar',      team_name:'Racing Bulls',    points:6,  wins:0,  driver_number:6  },
+  {position:17,full_name:'Jack Doohan',       team_name:'Alpine',          points:4,  wins:0,  driver_number:7  },
+  {position:18,full_name:'Lance Stroll',      team_name:'Aston Martin',    points:2,  wins:0,  driver_number:18 },
+  {position:19,full_name:'Gabriel Bortoleto', team_name:'Kick Sauber',     points:2,  wins:0,  driver_number:5  },
+  {position:20,full_name:'Yuki Tsunoda',      team_name:'Red Bull Racing', points:0,  wins:0,  driver_number:22 },
+];
+const LC = [
+  {position:1, team_name:'McLaren',         points:221,wins:3},
+  {position:2, team_name:'Ferrari',          points:158,wins:1},
+  {position:3, team_name:'Red Bull Racing',  points:148,wins:4},
+  {position:4, team_name:'Mercedes',         points:130,wins:0},
+  {position:5, team_name:'Williams',         points:68, wins:0},
+  {position:6, team_name:'Aston Martin',     points:34, wins:0},
+  {position:7, team_name:'Alpine',           points:22, wins:0},
+  {position:8, team_name:'Haas',             points:20, wins:0},
+  {position:9, team_name:'Racing Bulls',     points:16, wins:0},
+  {position:10,team_name:'Kick Sauber',      points:8,  wins:0},
+];
+const LAST = [
+  {pos:'1',name:'Charles Leclerc', team:'Ferrari',      pts:'+25'},
+  {pos:'2',name:'Max Verstappen',  team:'Red Bull',     pts:'+18'},
+  {pos:'3',name:'Carlos Sainz',    team:'Williams',     pts:'+15'},
+  {pos:'4',name:'Lando Norris',    team:'McLaren',      pts:'+12'},
+  {pos:'5',name:'George Russell',  team:'Mercedes',     pts:'+10'},
+  {pos:'6',name:'Oscar Piastri',   team:'McLaren',      pts:'+8' },
+  {pos:'7',name:'Fernando Alonso', team:'Aston Martin', pts:'+6' },
+  {pos:'8',name:'Lewis Hamilton',  team:'Ferrari',      pts:'+4' },
+  {pos:'9',name:'Kimi Antonelli',  team:'Mercedes',     pts:'+2' },
+  {pos:'10',name:'Nico Hülkenberg',team:'Kick Sauber',  pts:'+1' },
+];
+
+// ─── NORMALIZERS ─────────────────────────────────
+function normOF1Drivers(data){
+  return [...data].sort((a,b)=>(b.points||0)-(a.points||0)).map((d,i)=>({
+    position:i+1, full_name:d.full_name||(d.first_name+' '+d.last_name).trim(),
+    team_name:d.team_name||d.constructor_name||'—',
+    points:+(d.points||0), wins:+(d.wins||0), driver_number:d.driver_number||'',
+  }));
+}
+function normOF1Teams(data){
+  return [...data].sort((a,b)=>(b.points||0)-(a.points||0)).map((d,i)=>({
+    position:i+1, team_name:d.team_name||d.constructor_name||'—',
+    points:+(d.points||0), wins:+(d.wins||0),
+  }));
+}
+function normJDrivers(s){
+  return s.map(d=>({
+    position:+d.position, full_name:`${d.Driver.givenName} ${d.Driver.familyName}`,
+    team_name:d.Constructors?.[0]?.name||'—', points:+(d.points||0), wins:+(d.wins||0),
+    driver_number:d.Driver?.permanentNumber||'',
+  }));
+}
+function normJTeams(s){
+  return s.map(c=>({
+    position:+c.position, team_name:c.Constructor?.name||'—',
+    points:+(c.points||0), wins:+(c.wins||0),
+  }));
+}
+function buildCtors(drivers){
+  const m={};
+  drivers.forEach(d=>{
+    if(!m[d.team_name]) m[d.team_name]={team_name:d.team_name,points:0,wins:0};
+    m[d.team_name].points+=d.points; m[d.team_name].wins+=d.wins;
+  });
+  return Object.values(m).sort((a,b)=>b.points-a.points).map((t,i)=>({...t,position:i+1}));
+}
+
+// ─── API CHAIN ────────────────────────────────────
+const OF1 = 'https://api.openf1.org/v1';
+const JLP = 'https://api.jolpi.ca/ergast/f1/2025';
+const tout = ms => AbortSignal.timeout(ms);
+
+async function getLatestSessionKey(){
+  const r = await fetch(`${OF1}/sessions?year=2025&session_type=Race`,{signal:tout(6000)});
+  if(!r.ok) throw new Error();
+  const d = await r.json();
+  if(!d?.length) throw new Error();
+  const now = Date.now();
+  const past = d.filter(s=>new Date(s.date_end||s.date_start)<now).sort((a,b)=>new Date(b.date_end)-new Date(a.date_end));
+  if(!past.length) throw new Error();
+  return {key:past[0].session_key, name:past[0].meeting_name||'Último GP'};
+}
+
+async function fromOpenF1(){
+  setMsg('Conectando con OpenF1…');
+  const {key,name} = await getLatestSessionKey();
+  setMsg(`Cargando datos de ${name}…`);
+  const [dr,tr] = await Promise.all([
+    fetch(`${OF1}/championship_drivers?session_key=${key}`,{signal:tout(7000)}),
+    fetch(`${OF1}/championship_teams?session_key=${key}`,  {signal:tout(7000)}),
+  ]);
+  if(!dr.ok) throw new Error();
+  const [dd,td] = await Promise.all([dr.json(),tr.json()]);
+  if(!dd?.length) throw new Error();
+  const drivers = normOF1Drivers(dd);
+  const ctors   = td?.length ? normOF1Teams(td) : buildCtors(drivers);
+  return {drivers,ctors,source:'openf1',name};
+}
+
+async function fromJolpika(){
+  setMsg('OpenF1 no disponible · Probando Jolpica…');
+  document.getElementById('notice-jolpika').style.display='flex';
+  const [dr,cr] = await Promise.all([
+    fetch(`${JLP}/driverStandings.json`,     {signal:tout(8000)}),
+    fetch(`${JLP}/constructorStandings.json`,{signal:tout(8000)}),
+  ]);
+  if(!dr.ok) throw new Error();
+  const [dd,cd] = await Promise.all([dr.json(),cr.json()]);
+  const rD = dd?.MRData?.StandingsTable?.StandingsLists?.[0]?.DriverStandings;
+  const rC = cd?.MRData?.StandingsTable?.StandingsLists?.[0]?.ConstructorStandings;
+  if(!rD?.length) throw new Error();
+  const round = dd?.MRData?.StandingsTable?.StandingsLists?.[0]?.round;
+  const name  = round ? `Ronda ${round}` : 'Último GP';
+  const drivers = normJDrivers(rD);
+  const ctors   = rC?.length ? normJTeams(rC) : buildCtors(drivers);
+  return {drivers,ctors,source:'jolpika',name};
+}
+
+async function load(){
+  let res;
+  try       { res = await fromOpenF1(); }
+  catch(e1) { try { res = await fromJolpika(); }
+    catch(e2) {
+      document.getElementById('notice-local').style.display='flex';
+      res = {drivers:LD,ctors:LC,source:'local',name:'Mónaco 2025'};
+    }
+  }
+  document.getElementById('std-loading').style.display='none';
+  document.getElementById('std-tabs').style.display='flex';
+
+  const SRC = {
+    openf1: {cls:'live',  icon:'🟢', text:'OpenF1 · Tiempo real'},
+    jolpika:{cls:'cache', icon:'🟡', text:'Jolpika/Ergast API'},
+    local:  {cls:'local', icon:'⚪', text:`Datos locales · ${res.name}`},
+  };
+  const s = SRC[res.source];
+  document.getElementById('source-badge').innerHTML=`<span class="source-pill ${s.cls}">${s.icon} ${s.text}</span>`;
+  document.getElementById('last-race-title').textContent = `Último GP · ${res.name}`;
+
+  renderDrivers(res.drivers);
+  renderCtors(res.ctors);
+  renderLastRace();
+}
+
+// ─── RENDERERS ───────────────────────────────────
+const pc = p => p===1?'p1':p===2?'p2':p===3?'p3':'';
+function animBars(){
+  requestAnimationFrame(()=>setTimeout(()=>{
+    document.querySelectorAll('[data-w]').forEach(el=>el.style.width=el.dataset.w+'%');
+  },80));
+}
+
+function renderLeader(id,name,sub,subC,pts,wins,badge){
+  const c=tc(subC);
+  document.getElementById(id).innerHTML=`
+    <div class="leader-stripe" style="background:${c}"></div>
+    <div class="leader-badge">${badge}</div>
+    <div class="leader-info">
+      <div class="leader-name">${name}</div>
+      <div class="leader-sub" style="color:${c}">${sub}</div>
+    </div>
+    <div class="leader-stat"><div class="leader-stat-num">${pts}</div><div class="leader-stat-label">Puntos</div></div>
+    <div class="leader-stat"><div class="leader-stat-num">${wins}</div><div class="leader-stat-label">Victorias</div></div>`;
+}
+
+function renderGap(id,items,nameKey){
+  const max=items[0]?.points||1;
+  document.getElementById(id).innerHTML=items.slice(0,10).map(it=>{
+    const c=tc(it.team_name||it[nameKey]);
+    const pct=Math.round(it.points/max*100);
+    const dif=it.points===max?'Líder':`−${max-it.points}`;
+    const shortName=(it.full_name||it[nameKey]||'').split(' ').pop();
+    return `<div class="gap-row">
+      <div class="gap-name">${shortName}</div>
+      <div class="gap-bar-wrap"><div class="gap-fill" style="background:${c}" data-w="${pct}"></div></div>
+      <div class="gap-pts">${it.points}</div>
+      <div class="gap-diff" style="color:${it.points===max?'var(--red)':'var(--gray-mid)'}">${dif}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderDrivers(d){
+  const max=d[0]?.points||1;
+  renderLeader('leader-d',d[0].full_name,d[0].team_name,d[0].team_name,d[0].points,d[0].wins,'🏆 Líder del Campeonato');
+  document.getElementById('rows-d').innerHTML=d.map(v=>{
+    const c=tc(v.team_name);
+    const pct=Math.round(v.points/max*100);
+    const dif=v.position===1?'—':`−${max-v.points}`;
+    return `<div class="std-row"><div class="std-cells col-d">
+      <div class="std-pos ${pc(v.position)}">${v.position}</div>
+      <div class="std-bar" style="background:${c}"></div>
+      <div>
+        <div class="std-driver-name">${v.full_name}</div>
+        <div class="std-driver-team">${v.team_name}</div>
+        <div class="std-progress"><div class="std-progress-fill" style="background:${c}" data-w="${pct}"></div></div>
+      </div>
+      <div class="std-code">${v.driver_number?'#'+v.driver_number:''}</div>
+      <div class="std-wins-cell">${v.wins}</div>
+      <div><div class="std-pts">${v.points}</div><div class="std-diff">${dif}</div></div>
+    </div></div>`;
+  }).join('');
+  renderGap('gap-d',d,'full_name');
+  animBars();
+}
+
+function renderCtors(c){
+  const max=c[0]?.points||1;
+  renderLeader('leader-c',c[0].team_name,'Constructor · 2025',c[0].team_name,c[0].points,c[0].wins,'🔧 Líder Constructores');
+  document.getElementById('rows-c').innerHTML=c.map(v=>{
+    const col=tc(v.team_name);
+    const pct=Math.round(v.points/max*100);
+    const dif=v.position===1?'—':`−${max-v.points}`;
+    return `<div class="std-row"><div class="std-cells col-c">
+      <div class="std-pos ${pc(v.position)}">${v.position}</div>
+      <div class="std-bar" style="background:${col}"></div>
+      <div>
+        <div class="std-driver-name">${v.team_name}</div>
+        <div class="std-progress" style="max-width:220px"><div class="std-progress-fill" style="background:${col}" data-w="${pct}"></div></div>
+      </div>
+      <div class="std-wins-cell">${v.wins}</div>
+      <div><div class="std-pts">${v.points}</div><div class="std-diff">${dif}</div></div>
+    </div></div>`;
+  }).join('');
+  renderGap('gap-c',c,'team_name');
+  animBars();
+}
+
+function renderLastRace(){
+  document.getElementById('last-race').innerHTML=LAST.map(r=>{
+    const c=tc(r.team);
+    const p=r.pos==='1'?'p1':r.pos==='2'?'p2':r.pos==='3'?'p3':'';
+    const ptC=r.pos==='1'?'var(--gold)':r.pos==='2'?'var(--silver)':r.pos==='3'?'var(--bronze)':'var(--gray)';
+    return `<div class="result-row">
+      <div class="result-pos ${p}">${r.pos}</div>
+      <div class="result-stripe" style="background:${c}"></div>
+      <div style="flex:1"><div class="result-name">${r.name}</div><div class="result-team">${r.team}</div></div>
+      <div class="result-pts" style="color:${ptC}">${r.pts}</div>
+    </div>`;
+  }).join('');
+}
+
+// ─── TABS ─────────────────────────────────────────
+function switchTab(tab,btn){
+  document.querySelectorAll('.std-page-tab').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.std-section').forEach(s=>s.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(`sec-${tab}`).classList.add('active');
+  setTimeout(animBars,50);
+}
+
+// ─── CLOCK ────────────────────────────────────────
+function setMsg(m){ const e=document.getElementById('load-msg'); if(e) e.textContent=m; }
+
+(function clock(){
+  const pad=n=>String(n).padStart(2,'0');
+  setInterval(()=>{
+    const n=new Date();
+    const c=document.getElementById('gp-clock');
+    const d=document.getElementById('gp-clock-date');
+    if(c) c.textContent=`${pad(n.getHours())}:${pad(n.getMinutes())}:${pad(n.getSeconds())}`;
+    if(d){
+      const ms=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+      const wd=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+      d.textContent=`${wd[n.getDay()]} ${n.getDate()} ${ms[n.getMonth()]}`;
+    }
+  },1000);
+})();
+
+function gpToggleMenu(){
+  document.getElementById('gp-mobile-nav').classList.toggle('open');
+  document.getElementById('gp-hamburger').classList.toggle('open');
+}
+
+load();
+</script>
+</body>
+</html>
